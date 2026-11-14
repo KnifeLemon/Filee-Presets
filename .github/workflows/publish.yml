@@ -66,7 +66,8 @@ jobs:
       - name: Commit as github-actions[bot]
         working-directory: gallery
         run: |
-          git add -A -- presets index.json
+          git add -A -- index.json
+          if [ -d presets ] || git ls-files --error-unmatch presets > /dev/null 2>&1; then git add -A -- presets; fi
           if git diff --cached --quiet; then
             echo "Nothing to publish."
             exit 0
