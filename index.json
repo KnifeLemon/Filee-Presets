@@ -1,5 +1,1703 @@
 {
   "version": 1,
-  "generated": "2026-11-15T00:00:00Z",
-  "presets": []
+  "generated": "2026-11-14T21:18:44Z",
+  "presets": [
+    {
+      "id": "draft-pdf-for-review",
+      "title": "Draft PDF for review",
+      "description": "Turns documents (Word, HWP, ODT, PowerPoint and others) or existing PDFs into a PDF with a large, faint DRAFT across every page and page numbers (1 / 5) at the bottom, so nobody mistakes a review copy for the final one. Saved next to the original as name_draft.pdf. Office documents need LibreOffice (Engines page).",
+      "author": "KnifeLemon",
+      "tags": [
+        "documents",
+        "pdf",
+        "watermark",
+        "work"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "pdf"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 2,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/draft-pdf-for-review/images/1.webp",
+        "presets/draft-pdf-for-review/images/2.webp"
+      ],
+      "thumb": "presets/draft-pdf-for-review/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/draft-pdf-for-review/images/ar/1.webp",
+          "presets/draft-pdf-for-review/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/draft-pdf-for-review/images/bn-BD/1.webp",
+          "presets/draft-pdf-for-review/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/draft-pdf-for-review/images/de/1.webp",
+          "presets/draft-pdf-for-review/images/de/2.webp"
+        ],
+        "en": [
+          "presets/draft-pdf-for-review/images/en/1.webp",
+          "presets/draft-pdf-for-review/images/en/2.webp"
+        ],
+        "es": [
+          "presets/draft-pdf-for-review/images/es/1.webp",
+          "presets/draft-pdf-for-review/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/draft-pdf-for-review/images/fa/1.webp",
+          "presets/draft-pdf-for-review/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/draft-pdf-for-review/images/fr/1.webp",
+          "presets/draft-pdf-for-review/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/draft-pdf-for-review/images/hi/1.webp",
+          "presets/draft-pdf-for-review/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/draft-pdf-for-review/images/id/1.webp",
+          "presets/draft-pdf-for-review/images/id/2.webp"
+        ],
+        "it": [
+          "presets/draft-pdf-for-review/images/it/1.webp",
+          "presets/draft-pdf-for-review/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/draft-pdf-for-review/images/ja/1.webp",
+          "presets/draft-pdf-for-review/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/draft-pdf-for-review/images/ko/1.webp",
+          "presets/draft-pdf-for-review/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/draft-pdf-for-review/images/mn/1.webp",
+          "presets/draft-pdf-for-review/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/draft-pdf-for-review/images/ne/1.webp",
+          "presets/draft-pdf-for-review/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/draft-pdf-for-review/images/pl/1.webp",
+          "presets/draft-pdf-for-review/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/draft-pdf-for-review/images/pt-BR/1.webp",
+          "presets/draft-pdf-for-review/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/draft-pdf-for-review/images/pt-PT/1.webp",
+          "presets/draft-pdf-for-review/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/draft-pdf-for-review/images/ru/1.webp",
+          "presets/draft-pdf-for-review/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/draft-pdf-for-review/images/th/1.webp",
+          "presets/draft-pdf-for-review/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/draft-pdf-for-review/images/tr/1.webp",
+          "presets/draft-pdf-for-review/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/draft-pdf-for-review/images/vi/1.webp",
+          "presets/draft-pdf-for-review/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/draft-pdf-for-review/images/zh-CN/1.webp",
+          "presets/draft-pdf-for-review/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/draft-pdf-for-review/images/zh-TW/1.webp",
+          "presets/draft-pdf-for-review/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/draft-pdf-for-review/images/ar/1-thumb.webp",
+        "bn-BD": "presets/draft-pdf-for-review/images/bn-BD/1-thumb.webp",
+        "de": "presets/draft-pdf-for-review/images/de/1-thumb.webp",
+        "en": "presets/draft-pdf-for-review/images/en/1-thumb.webp",
+        "es": "presets/draft-pdf-for-review/images/es/1-thumb.webp",
+        "fa": "presets/draft-pdf-for-review/images/fa/1-thumb.webp",
+        "fr": "presets/draft-pdf-for-review/images/fr/1-thumb.webp",
+        "hi": "presets/draft-pdf-for-review/images/hi/1-thumb.webp",
+        "id": "presets/draft-pdf-for-review/images/id/1-thumb.webp",
+        "it": "presets/draft-pdf-for-review/images/it/1-thumb.webp",
+        "ja": "presets/draft-pdf-for-review/images/ja/1-thumb.webp",
+        "ko": "presets/draft-pdf-for-review/images/ko/1-thumb.webp",
+        "mn": "presets/draft-pdf-for-review/images/mn/1-thumb.webp",
+        "ne": "presets/draft-pdf-for-review/images/ne/1-thumb.webp",
+        "pl": "presets/draft-pdf-for-review/images/pl/1-thumb.webp",
+        "pt-BR": "presets/draft-pdf-for-review/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/draft-pdf-for-review/images/pt-PT/1-thumb.webp",
+        "ru": "presets/draft-pdf-for-review/images/ru/1-thumb.webp",
+        "th": "presets/draft-pdf-for-review/images/th/1-thumb.webp",
+        "tr": "presets/draft-pdf-for-review/images/tr/1-thumb.webp",
+        "vi": "presets/draft-pdf-for-review/images/vi/1-thumb.webp",
+        "zh-CN": "presets/draft-pdf-for-review/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/draft-pdf-for-review/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/draft-pdf-for-review/preset.json",
+      "sha256": "84fa08ce0536df8d1afed2361c6ebe16ace8189b7d90f39650173405a0e0f4a6",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
+    {
+      "id": "instagram-4-5-white-frame",
+      "title": "Instagram 4:5 white frame",
+      "description": "Puts a photo on a white 4:5 portrait canvas, the tallest shape an Instagram feed post shows, so landscape and square photos fit without being cropped. Opens the Add background window with this look ready: check the preview, change the colour or the padding if you like, and save. Writes a PNG next to the original. After installing, add it to your images donut on the Donut toolbar page.",
+      "author": "KnifeLemon",
+      "tags": [
+        "images",
+        "social",
+        "design"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "tool"
+      ],
+      "formats": {
+        "from": [],
+        "to": []
+      },
+      "minVersion": "2.5.0",
+      "warnings": [],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 3,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/instagram-4-5-white-frame/images/1.webp",
+        "presets/instagram-4-5-white-frame/images/2.webp"
+      ],
+      "thumb": "presets/instagram-4-5-white-frame/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/instagram-4-5-white-frame/images/ar/1.webp",
+          "presets/instagram-4-5-white-frame/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/instagram-4-5-white-frame/images/bn-BD/1.webp",
+          "presets/instagram-4-5-white-frame/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/instagram-4-5-white-frame/images/de/1.webp",
+          "presets/instagram-4-5-white-frame/images/de/2.webp"
+        ],
+        "en": [
+          "presets/instagram-4-5-white-frame/images/en/1.webp",
+          "presets/instagram-4-5-white-frame/images/en/2.webp"
+        ],
+        "es": [
+          "presets/instagram-4-5-white-frame/images/es/1.webp",
+          "presets/instagram-4-5-white-frame/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/instagram-4-5-white-frame/images/fa/1.webp",
+          "presets/instagram-4-5-white-frame/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/instagram-4-5-white-frame/images/fr/1.webp",
+          "presets/instagram-4-5-white-frame/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/instagram-4-5-white-frame/images/hi/1.webp",
+          "presets/instagram-4-5-white-frame/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/instagram-4-5-white-frame/images/id/1.webp",
+          "presets/instagram-4-5-white-frame/images/id/2.webp"
+        ],
+        "it": [
+          "presets/instagram-4-5-white-frame/images/it/1.webp",
+          "presets/instagram-4-5-white-frame/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/instagram-4-5-white-frame/images/ja/1.webp",
+          "presets/instagram-4-5-white-frame/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/instagram-4-5-white-frame/images/ko/1.webp",
+          "presets/instagram-4-5-white-frame/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/instagram-4-5-white-frame/images/mn/1.webp",
+          "presets/instagram-4-5-white-frame/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/instagram-4-5-white-frame/images/ne/1.webp",
+          "presets/instagram-4-5-white-frame/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/instagram-4-5-white-frame/images/pl/1.webp",
+          "presets/instagram-4-5-white-frame/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/instagram-4-5-white-frame/images/pt-BR/1.webp",
+          "presets/instagram-4-5-white-frame/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/instagram-4-5-white-frame/images/pt-PT/1.webp",
+          "presets/instagram-4-5-white-frame/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/instagram-4-5-white-frame/images/ru/1.webp",
+          "presets/instagram-4-5-white-frame/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/instagram-4-5-white-frame/images/th/1.webp",
+          "presets/instagram-4-5-white-frame/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/instagram-4-5-white-frame/images/tr/1.webp",
+          "presets/instagram-4-5-white-frame/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/instagram-4-5-white-frame/images/vi/1.webp",
+          "presets/instagram-4-5-white-frame/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/instagram-4-5-white-frame/images/zh-CN/1.webp",
+          "presets/instagram-4-5-white-frame/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/instagram-4-5-white-frame/images/zh-TW/1.webp",
+          "presets/instagram-4-5-white-frame/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/instagram-4-5-white-frame/images/ar/1-thumb.webp",
+        "bn-BD": "presets/instagram-4-5-white-frame/images/bn-BD/1-thumb.webp",
+        "de": "presets/instagram-4-5-white-frame/images/de/1-thumb.webp",
+        "en": "presets/instagram-4-5-white-frame/images/en/1-thumb.webp",
+        "es": "presets/instagram-4-5-white-frame/images/es/1-thumb.webp",
+        "fa": "presets/instagram-4-5-white-frame/images/fa/1-thumb.webp",
+        "fr": "presets/instagram-4-5-white-frame/images/fr/1-thumb.webp",
+        "hi": "presets/instagram-4-5-white-frame/images/hi/1-thumb.webp",
+        "id": "presets/instagram-4-5-white-frame/images/id/1-thumb.webp",
+        "it": "presets/instagram-4-5-white-frame/images/it/1-thumb.webp",
+        "ja": "presets/instagram-4-5-white-frame/images/ja/1-thumb.webp",
+        "ko": "presets/instagram-4-5-white-frame/images/ko/1-thumb.webp",
+        "mn": "presets/instagram-4-5-white-frame/images/mn/1-thumb.webp",
+        "ne": "presets/instagram-4-5-white-frame/images/ne/1-thumb.webp",
+        "pl": "presets/instagram-4-5-white-frame/images/pl/1-thumb.webp",
+        "pt-BR": "presets/instagram-4-5-white-frame/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/instagram-4-5-white-frame/images/pt-PT/1-thumb.webp",
+        "ru": "presets/instagram-4-5-white-frame/images/ru/1-thumb.webp",
+        "th": "presets/instagram-4-5-white-frame/images/th/1-thumb.webp",
+        "tr": "presets/instagram-4-5-white-frame/images/tr/1-thumb.webp",
+        "vi": "presets/instagram-4-5-white-frame/images/vi/1-thumb.webp",
+        "zh-CN": "presets/instagram-4-5-white-frame/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/instagram-4-5-white-frame/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/instagram-4-5-white-frame/preset.json",
+      "sha256": "4c722fc600c6e4af557440aeb91dd953061548689e026b8360e7d26a952fb33c",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
+    {
+      "id": "merge-into-a4-pdf-for-printing",
+      "title": "Merge into one A4 PDF for printing",
+      "description": "Drop PDFs, pictures and documents together and get one PDF where every page is A4, in the order you dropped them, with a bookmark for each file and page numbers at the bottom. Pages of other sizes (Letter, A5, phone screenshots, receipts) are fitted onto A4, so the whole file prints in one go. Saved as name_print.pdf after the first file. Office documents need LibreOffice (Engines page).",
+      "author": "KnifeLemon",
+      "tags": [
+        "pdf",
+        "merge",
+        "print",
+        "work"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "pdf"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 4,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/merge-into-a4-pdf-for-printing/images/1.webp",
+        "presets/merge-into-a4-pdf-for-printing/images/2.webp"
+      ],
+      "thumb": "presets/merge-into-a4-pdf-for-printing/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/merge-into-a4-pdf-for-printing/images/ar/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/merge-into-a4-pdf-for-printing/images/bn-BD/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/merge-into-a4-pdf-for-printing/images/de/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/de/2.webp"
+        ],
+        "en": [
+          "presets/merge-into-a4-pdf-for-printing/images/en/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/en/2.webp"
+        ],
+        "es": [
+          "presets/merge-into-a4-pdf-for-printing/images/es/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/merge-into-a4-pdf-for-printing/images/fa/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/merge-into-a4-pdf-for-printing/images/fr/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/merge-into-a4-pdf-for-printing/images/hi/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/merge-into-a4-pdf-for-printing/images/id/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/id/2.webp"
+        ],
+        "it": [
+          "presets/merge-into-a4-pdf-for-printing/images/it/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/merge-into-a4-pdf-for-printing/images/ja/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/merge-into-a4-pdf-for-printing/images/ko/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/merge-into-a4-pdf-for-printing/images/mn/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/merge-into-a4-pdf-for-printing/images/ne/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/merge-into-a4-pdf-for-printing/images/pl/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/merge-into-a4-pdf-for-printing/images/pt-BR/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/merge-into-a4-pdf-for-printing/images/pt-PT/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/merge-into-a4-pdf-for-printing/images/ru/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/merge-into-a4-pdf-for-printing/images/th/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/merge-into-a4-pdf-for-printing/images/tr/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/merge-into-a4-pdf-for-printing/images/vi/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/merge-into-a4-pdf-for-printing/images/zh-CN/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/merge-into-a4-pdf-for-printing/images/zh-TW/1.webp",
+          "presets/merge-into-a4-pdf-for-printing/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/merge-into-a4-pdf-for-printing/images/ar/1-thumb.webp",
+        "bn-BD": "presets/merge-into-a4-pdf-for-printing/images/bn-BD/1-thumb.webp",
+        "de": "presets/merge-into-a4-pdf-for-printing/images/de/1-thumb.webp",
+        "en": "presets/merge-into-a4-pdf-for-printing/images/en/1-thumb.webp",
+        "es": "presets/merge-into-a4-pdf-for-printing/images/es/1-thumb.webp",
+        "fa": "presets/merge-into-a4-pdf-for-printing/images/fa/1-thumb.webp",
+        "fr": "presets/merge-into-a4-pdf-for-printing/images/fr/1-thumb.webp",
+        "hi": "presets/merge-into-a4-pdf-for-printing/images/hi/1-thumb.webp",
+        "id": "presets/merge-into-a4-pdf-for-printing/images/id/1-thumb.webp",
+        "it": "presets/merge-into-a4-pdf-for-printing/images/it/1-thumb.webp",
+        "ja": "presets/merge-into-a4-pdf-for-printing/images/ja/1-thumb.webp",
+        "ko": "presets/merge-into-a4-pdf-for-printing/images/ko/1-thumb.webp",
+        "mn": "presets/merge-into-a4-pdf-for-printing/images/mn/1-thumb.webp",
+        "ne": "presets/merge-into-a4-pdf-for-printing/images/ne/1-thumb.webp",
+        "pl": "presets/merge-into-a4-pdf-for-printing/images/pl/1-thumb.webp",
+        "pt-BR": "presets/merge-into-a4-pdf-for-printing/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/merge-into-a4-pdf-for-printing/images/pt-PT/1-thumb.webp",
+        "ru": "presets/merge-into-a4-pdf-for-printing/images/ru/1-thumb.webp",
+        "th": "presets/merge-into-a4-pdf-for-printing/images/th/1-thumb.webp",
+        "tr": "presets/merge-into-a4-pdf-for-printing/images/tr/1-thumb.webp",
+        "vi": "presets/merge-into-a4-pdf-for-printing/images/vi/1-thumb.webp",
+        "zh-CN": "presets/merge-into-a4-pdf-for-printing/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/merge-into-a4-pdf-for-printing/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/merge-into-a4-pdf-for-printing/preset.json",
+      "sha256": "8d0c656bace5b64810523c55209e5d9e8057553567469a0151a61984e3080068",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
+    {
+      "id": "photos-for-social-media",
+      "title": "Photos for social media",
+      "description": "Turns photos (JPG, PNG, HEIC, WebP and more) into JPGs ready for Instagram, Facebook, X or Threads: the long edge becomes 2048 px, quality 85, and every file stays under 4 MB. Location, camera and other metadata are removed so you don't share where a photo was taken; the colour profile stays, so colours look right. Saved next to the original as name_social.jpg.",
+      "author": "KnifeLemon",
+      "tags": [
+        "images",
+        "social",
+        "resize",
+        "compress"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "jpg"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [
+        {
+          "code": "strips_metadata",
+          "severity": "info"
+        }
+      ],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 5,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/photos-for-social-media/images/1.webp",
+        "presets/photos-for-social-media/images/2.webp"
+      ],
+      "thumb": "presets/photos-for-social-media/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/photos-for-social-media/images/ar/1.webp",
+          "presets/photos-for-social-media/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/photos-for-social-media/images/bn-BD/1.webp",
+          "presets/photos-for-social-media/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/photos-for-social-media/images/de/1.webp",
+          "presets/photos-for-social-media/images/de/2.webp"
+        ],
+        "en": [
+          "presets/photos-for-social-media/images/en/1.webp",
+          "presets/photos-for-social-media/images/en/2.webp"
+        ],
+        "es": [
+          "presets/photos-for-social-media/images/es/1.webp",
+          "presets/photos-for-social-media/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/photos-for-social-media/images/fa/1.webp",
+          "presets/photos-for-social-media/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/photos-for-social-media/images/fr/1.webp",
+          "presets/photos-for-social-media/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/photos-for-social-media/images/hi/1.webp",
+          "presets/photos-for-social-media/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/photos-for-social-media/images/id/1.webp",
+          "presets/photos-for-social-media/images/id/2.webp"
+        ],
+        "it": [
+          "presets/photos-for-social-media/images/it/1.webp",
+          "presets/photos-for-social-media/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/photos-for-social-media/images/ja/1.webp",
+          "presets/photos-for-social-media/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/photos-for-social-media/images/ko/1.webp",
+          "presets/photos-for-social-media/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/photos-for-social-media/images/mn/1.webp",
+          "presets/photos-for-social-media/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/photos-for-social-media/images/ne/1.webp",
+          "presets/photos-for-social-media/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/photos-for-social-media/images/pl/1.webp",
+          "presets/photos-for-social-media/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/photos-for-social-media/images/pt-BR/1.webp",
+          "presets/photos-for-social-media/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/photos-for-social-media/images/pt-PT/1.webp",
+          "presets/photos-for-social-media/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/photos-for-social-media/images/ru/1.webp",
+          "presets/photos-for-social-media/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/photos-for-social-media/images/th/1.webp",
+          "presets/photos-for-social-media/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/photos-for-social-media/images/tr/1.webp",
+          "presets/photos-for-social-media/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/photos-for-social-media/images/vi/1.webp",
+          "presets/photos-for-social-media/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/photos-for-social-media/images/zh-CN/1.webp",
+          "presets/photos-for-social-media/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/photos-for-social-media/images/zh-TW/1.webp",
+          "presets/photos-for-social-media/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/photos-for-social-media/images/ar/1-thumb.webp",
+        "bn-BD": "presets/photos-for-social-media/images/bn-BD/1-thumb.webp",
+        "de": "presets/photos-for-social-media/images/de/1-thumb.webp",
+        "en": "presets/photos-for-social-media/images/en/1-thumb.webp",
+        "es": "presets/photos-for-social-media/images/es/1-thumb.webp",
+        "fa": "presets/photos-for-social-media/images/fa/1-thumb.webp",
+        "fr": "presets/photos-for-social-media/images/fr/1-thumb.webp",
+        "hi": "presets/photos-for-social-media/images/hi/1-thumb.webp",
+        "id": "presets/photos-for-social-media/images/id/1-thumb.webp",
+        "it": "presets/photos-for-social-media/images/it/1-thumb.webp",
+        "ja": "presets/photos-for-social-media/images/ja/1-thumb.webp",
+        "ko": "presets/photos-for-social-media/images/ko/1-thumb.webp",
+        "mn": "presets/photos-for-social-media/images/mn/1-thumb.webp",
+        "ne": "presets/photos-for-social-media/images/ne/1-thumb.webp",
+        "pl": "presets/photos-for-social-media/images/pl/1-thumb.webp",
+        "pt-BR": "presets/photos-for-social-media/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/photos-for-social-media/images/pt-PT/1-thumb.webp",
+        "ru": "presets/photos-for-social-media/images/ru/1-thumb.webp",
+        "th": "presets/photos-for-social-media/images/th/1-thumb.webp",
+        "tr": "presets/photos-for-social-media/images/tr/1-thumb.webp",
+        "vi": "presets/photos-for-social-media/images/vi/1-thumb.webp",
+        "zh-CN": "presets/photos-for-social-media/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/photos-for-social-media/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/photos-for-social-media/preset.json",
+      "sha256": "a332432476be4da206699a2189028fbcc98127415ae6516b1b8d63769ea0b801",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
+    {
+      "id": "podcast-voice-mp3",
+      "title": "Podcast voice MP3 (mono)",
+      "description": "Turns voice recordings (WAV, M4A, phone memos, the sound of a video) into a mono MP3 at 96 kbit/s, a common choice for spoken podcasts and voice notes: about 43 MB per hour, and it plays everywhere. Music sounds better in stereo, so use it for speech. Saved as name_podcast.mp3. Needs FFmpeg.",
+      "author": "KnifeLemon",
+      "tags": [
+        "audio",
+        "compress"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "mp3"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 6,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/podcast-voice-mp3/images/1.webp",
+        "presets/podcast-voice-mp3/images/2.webp"
+      ],
+      "thumb": "presets/podcast-voice-mp3/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/podcast-voice-mp3/images/ar/1.webp",
+          "presets/podcast-voice-mp3/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/podcast-voice-mp3/images/bn-BD/1.webp",
+          "presets/podcast-voice-mp3/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/podcast-voice-mp3/images/de/1.webp",
+          "presets/podcast-voice-mp3/images/de/2.webp"
+        ],
+        "en": [
+          "presets/podcast-voice-mp3/images/en/1.webp",
+          "presets/podcast-voice-mp3/images/en/2.webp"
+        ],
+        "es": [
+          "presets/podcast-voice-mp3/images/es/1.webp",
+          "presets/podcast-voice-mp3/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/podcast-voice-mp3/images/fa/1.webp",
+          "presets/podcast-voice-mp3/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/podcast-voice-mp3/images/fr/1.webp",
+          "presets/podcast-voice-mp3/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/podcast-voice-mp3/images/hi/1.webp",
+          "presets/podcast-voice-mp3/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/podcast-voice-mp3/images/id/1.webp",
+          "presets/podcast-voice-mp3/images/id/2.webp"
+        ],
+        "it": [
+          "presets/podcast-voice-mp3/images/it/1.webp",
+          "presets/podcast-voice-mp3/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/podcast-voice-mp3/images/ja/1.webp",
+          "presets/podcast-voice-mp3/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/podcast-voice-mp3/images/ko/1.webp",
+          "presets/podcast-voice-mp3/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/podcast-voice-mp3/images/mn/1.webp",
+          "presets/podcast-voice-mp3/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/podcast-voice-mp3/images/ne/1.webp",
+          "presets/podcast-voice-mp3/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/podcast-voice-mp3/images/pl/1.webp",
+          "presets/podcast-voice-mp3/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/podcast-voice-mp3/images/pt-BR/1.webp",
+          "presets/podcast-voice-mp3/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/podcast-voice-mp3/images/pt-PT/1.webp",
+          "presets/podcast-voice-mp3/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/podcast-voice-mp3/images/ru/1.webp",
+          "presets/podcast-voice-mp3/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/podcast-voice-mp3/images/th/1.webp",
+          "presets/podcast-voice-mp3/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/podcast-voice-mp3/images/tr/1.webp",
+          "presets/podcast-voice-mp3/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/podcast-voice-mp3/images/vi/1.webp",
+          "presets/podcast-voice-mp3/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/podcast-voice-mp3/images/zh-CN/1.webp",
+          "presets/podcast-voice-mp3/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/podcast-voice-mp3/images/zh-TW/1.webp",
+          "presets/podcast-voice-mp3/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/podcast-voice-mp3/images/ar/1-thumb.webp",
+        "bn-BD": "presets/podcast-voice-mp3/images/bn-BD/1-thumb.webp",
+        "de": "presets/podcast-voice-mp3/images/de/1-thumb.webp",
+        "en": "presets/podcast-voice-mp3/images/en/1-thumb.webp",
+        "es": "presets/podcast-voice-mp3/images/es/1-thumb.webp",
+        "fa": "presets/podcast-voice-mp3/images/fa/1-thumb.webp",
+        "fr": "presets/podcast-voice-mp3/images/fr/1-thumb.webp",
+        "hi": "presets/podcast-voice-mp3/images/hi/1-thumb.webp",
+        "id": "presets/podcast-voice-mp3/images/id/1-thumb.webp",
+        "it": "presets/podcast-voice-mp3/images/it/1-thumb.webp",
+        "ja": "presets/podcast-voice-mp3/images/ja/1-thumb.webp",
+        "ko": "presets/podcast-voice-mp3/images/ko/1-thumb.webp",
+        "mn": "presets/podcast-voice-mp3/images/mn/1-thumb.webp",
+        "ne": "presets/podcast-voice-mp3/images/ne/1-thumb.webp",
+        "pl": "presets/podcast-voice-mp3/images/pl/1-thumb.webp",
+        "pt-BR": "presets/podcast-voice-mp3/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/podcast-voice-mp3/images/pt-PT/1-thumb.webp",
+        "ru": "presets/podcast-voice-mp3/images/ru/1-thumb.webp",
+        "th": "presets/podcast-voice-mp3/images/th/1-thumb.webp",
+        "tr": "presets/podcast-voice-mp3/images/tr/1-thumb.webp",
+        "vi": "presets/podcast-voice-mp3/images/vi/1-thumb.webp",
+        "zh-CN": "presets/podcast-voice-mp3/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/podcast-voice-mp3/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/podcast-voice-mp3/preset.json",
+      "sha256": "b7126e18276e12735ed40d8ab188a5c9d05bc439b5003ca841f26104822cf1f9",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
+    {
+      "id": "scans-to-one-searchable-pdf",
+      "title": "Scans to one searchable PDF",
+      "description": "Drop the photos or scans of a paper document's pages, in order, and get one PDF with A4 pages whose text you can search, select and copy: Filee recognises the English text offline with Tesseract. Change the language in the preset (for example deu, fra or kor) for other documents. Saved as name_scan.pdf after the first page. Needs Tesseract (Engines page).",
+      "author": "KnifeLemon",
+      "tags": [
+        "pdf",
+        "ocr",
+        "merge",
+        "work"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "pdf"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 7,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/scans-to-one-searchable-pdf/images/1.webp",
+        "presets/scans-to-one-searchable-pdf/images/2.webp"
+      ],
+      "thumb": "presets/scans-to-one-searchable-pdf/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/scans-to-one-searchable-pdf/images/ar/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/scans-to-one-searchable-pdf/images/bn-BD/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/scans-to-one-searchable-pdf/images/de/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/de/2.webp"
+        ],
+        "en": [
+          "presets/scans-to-one-searchable-pdf/images/en/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/en/2.webp"
+        ],
+        "es": [
+          "presets/scans-to-one-searchable-pdf/images/es/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/scans-to-one-searchable-pdf/images/fa/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/scans-to-one-searchable-pdf/images/fr/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/scans-to-one-searchable-pdf/images/hi/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/scans-to-one-searchable-pdf/images/id/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/id/2.webp"
+        ],
+        "it": [
+          "presets/scans-to-one-searchable-pdf/images/it/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/scans-to-one-searchable-pdf/images/ja/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/scans-to-one-searchable-pdf/images/ko/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/scans-to-one-searchable-pdf/images/mn/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/scans-to-one-searchable-pdf/images/ne/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/scans-to-one-searchable-pdf/images/pl/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/scans-to-one-searchable-pdf/images/pt-BR/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/scans-to-one-searchable-pdf/images/pt-PT/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/scans-to-one-searchable-pdf/images/ru/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/scans-to-one-searchable-pdf/images/th/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/scans-to-one-searchable-pdf/images/tr/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/scans-to-one-searchable-pdf/images/vi/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/scans-to-one-searchable-pdf/images/zh-CN/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/scans-to-one-searchable-pdf/images/zh-TW/1.webp",
+          "presets/scans-to-one-searchable-pdf/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/scans-to-one-searchable-pdf/images/ar/1-thumb.webp",
+        "bn-BD": "presets/scans-to-one-searchable-pdf/images/bn-BD/1-thumb.webp",
+        "de": "presets/scans-to-one-searchable-pdf/images/de/1-thumb.webp",
+        "en": "presets/scans-to-one-searchable-pdf/images/en/1-thumb.webp",
+        "es": "presets/scans-to-one-searchable-pdf/images/es/1-thumb.webp",
+        "fa": "presets/scans-to-one-searchable-pdf/images/fa/1-thumb.webp",
+        "fr": "presets/scans-to-one-searchable-pdf/images/fr/1-thumb.webp",
+        "hi": "presets/scans-to-one-searchable-pdf/images/hi/1-thumb.webp",
+        "id": "presets/scans-to-one-searchable-pdf/images/id/1-thumb.webp",
+        "it": "presets/scans-to-one-searchable-pdf/images/it/1-thumb.webp",
+        "ja": "presets/scans-to-one-searchable-pdf/images/ja/1-thumb.webp",
+        "ko": "presets/scans-to-one-searchable-pdf/images/ko/1-thumb.webp",
+        "mn": "presets/scans-to-one-searchable-pdf/images/mn/1-thumb.webp",
+        "ne": "presets/scans-to-one-searchable-pdf/images/ne/1-thumb.webp",
+        "pl": "presets/scans-to-one-searchable-pdf/images/pl/1-thumb.webp",
+        "pt-BR": "presets/scans-to-one-searchable-pdf/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/scans-to-one-searchable-pdf/images/pt-PT/1-thumb.webp",
+        "ru": "presets/scans-to-one-searchable-pdf/images/ru/1-thumb.webp",
+        "th": "presets/scans-to-one-searchable-pdf/images/th/1-thumb.webp",
+        "tr": "presets/scans-to-one-searchable-pdf/images/tr/1-thumb.webp",
+        "vi": "presets/scans-to-one-searchable-pdf/images/vi/1-thumb.webp",
+        "zh-CN": "presets/scans-to-one-searchable-pdf/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/scans-to-one-searchable-pdf/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/scans-to-one-searchable-pdf/preset.json",
+      "sha256": "88288985d3546ff59d026815145f4b4ed400c4555b263ea25926cdc5f9f65784",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
+    {
+      "id": "small-gif-for-chat",
+      "title": "Small GIF for chat",
+      "description": "Turns a short video clip into a small looping GIF for chats and comments: at most 320 px wide (360 px tall), 10 frames a second and 128 colours, so a few seconds stay well under a few megabytes. Works best on clips of under ten seconds; cut longer videos first with Cut a clip. Saved as name_chat.gif. Needs FFmpeg.",
+      "author": "KnifeLemon",
+      "tags": [
+        "video",
+        "social",
+        "compress"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "gif"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 8,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/small-gif-for-chat/images/1.webp",
+        "presets/small-gif-for-chat/images/2.webp"
+      ],
+      "thumb": "presets/small-gif-for-chat/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/small-gif-for-chat/images/ar/1.webp",
+          "presets/small-gif-for-chat/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/small-gif-for-chat/images/bn-BD/1.webp",
+          "presets/small-gif-for-chat/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/small-gif-for-chat/images/de/1.webp",
+          "presets/small-gif-for-chat/images/de/2.webp"
+        ],
+        "en": [
+          "presets/small-gif-for-chat/images/en/1.webp",
+          "presets/small-gif-for-chat/images/en/2.webp"
+        ],
+        "es": [
+          "presets/small-gif-for-chat/images/es/1.webp",
+          "presets/small-gif-for-chat/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/small-gif-for-chat/images/fa/1.webp",
+          "presets/small-gif-for-chat/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/small-gif-for-chat/images/fr/1.webp",
+          "presets/small-gif-for-chat/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/small-gif-for-chat/images/hi/1.webp",
+          "presets/small-gif-for-chat/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/small-gif-for-chat/images/id/1.webp",
+          "presets/small-gif-for-chat/images/id/2.webp"
+        ],
+        "it": [
+          "presets/small-gif-for-chat/images/it/1.webp",
+          "presets/small-gif-for-chat/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/small-gif-for-chat/images/ja/1.webp",
+          "presets/small-gif-for-chat/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/small-gif-for-chat/images/ko/1.webp",
+          "presets/small-gif-for-chat/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/small-gif-for-chat/images/mn/1.webp",
+          "presets/small-gif-for-chat/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/small-gif-for-chat/images/ne/1.webp",
+          "presets/small-gif-for-chat/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/small-gif-for-chat/images/pl/1.webp",
+          "presets/small-gif-for-chat/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/small-gif-for-chat/images/pt-BR/1.webp",
+          "presets/small-gif-for-chat/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/small-gif-for-chat/images/pt-PT/1.webp",
+          "presets/small-gif-for-chat/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/small-gif-for-chat/images/ru/1.webp",
+          "presets/small-gif-for-chat/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/small-gif-for-chat/images/th/1.webp",
+          "presets/small-gif-for-chat/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/small-gif-for-chat/images/tr/1.webp",
+          "presets/small-gif-for-chat/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/small-gif-for-chat/images/vi/1.webp",
+          "presets/small-gif-for-chat/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/small-gif-for-chat/images/zh-CN/1.webp",
+          "presets/small-gif-for-chat/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/small-gif-for-chat/images/zh-TW/1.webp",
+          "presets/small-gif-for-chat/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/small-gif-for-chat/images/ar/1-thumb.webp",
+        "bn-BD": "presets/small-gif-for-chat/images/bn-BD/1-thumb.webp",
+        "de": "presets/small-gif-for-chat/images/de/1-thumb.webp",
+        "en": "presets/small-gif-for-chat/images/en/1-thumb.webp",
+        "es": "presets/small-gif-for-chat/images/es/1-thumb.webp",
+        "fa": "presets/small-gif-for-chat/images/fa/1-thumb.webp",
+        "fr": "presets/small-gif-for-chat/images/fr/1-thumb.webp",
+        "hi": "presets/small-gif-for-chat/images/hi/1-thumb.webp",
+        "id": "presets/small-gif-for-chat/images/id/1-thumb.webp",
+        "it": "presets/small-gif-for-chat/images/it/1-thumb.webp",
+        "ja": "presets/small-gif-for-chat/images/ja/1-thumb.webp",
+        "ko": "presets/small-gif-for-chat/images/ko/1-thumb.webp",
+        "mn": "presets/small-gif-for-chat/images/mn/1-thumb.webp",
+        "ne": "presets/small-gif-for-chat/images/ne/1-thumb.webp",
+        "pl": "presets/small-gif-for-chat/images/pl/1-thumb.webp",
+        "pt-BR": "presets/small-gif-for-chat/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/small-gif-for-chat/images/pt-PT/1-thumb.webp",
+        "ru": "presets/small-gif-for-chat/images/ru/1-thumb.webp",
+        "th": "presets/small-gif-for-chat/images/th/1-thumb.webp",
+        "tr": "presets/small-gif-for-chat/images/tr/1-thumb.webp",
+        "vi": "presets/small-gif-for-chat/images/vi/1-thumb.webp",
+        "zh-CN": "presets/small-gif-for-chat/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/small-gif-for-chat/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/small-gif-for-chat/preset.json",
+      "sha256": "6f09561e21614d89c93bebc65086fd7e4f30b8cf71846da79bfc8de5af07292d",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
+    {
+      "id": "smallest-pdf-for-email",
+      "title": "Smallest PDF for email",
+      "description": "Shrinks PDFs as far as they go while text stays sharp: pictures inside are brought down to screen resolution (72 dpi), document information (author, title, dates) is removed, and Ghostscript also tries when it is installed, keeping whichever file is smaller. Good for attachments and upload limits, not for printing. If a PDF can't get smaller, the original is kept.",
+      "author": "KnifeLemon",
+      "tags": [
+        "pdf",
+        "compress",
+        "work"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "pdf"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [
+        {
+          "code": "strips_metadata",
+          "severity": "info"
+        }
+      ],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 9,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/smallest-pdf-for-email/images/1.webp",
+        "presets/smallest-pdf-for-email/images/2.webp"
+      ],
+      "thumb": "presets/smallest-pdf-for-email/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/smallest-pdf-for-email/images/ar/1.webp",
+          "presets/smallest-pdf-for-email/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/smallest-pdf-for-email/images/bn-BD/1.webp",
+          "presets/smallest-pdf-for-email/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/smallest-pdf-for-email/images/de/1.webp",
+          "presets/smallest-pdf-for-email/images/de/2.webp"
+        ],
+        "en": [
+          "presets/smallest-pdf-for-email/images/en/1.webp",
+          "presets/smallest-pdf-for-email/images/en/2.webp"
+        ],
+        "es": [
+          "presets/smallest-pdf-for-email/images/es/1.webp",
+          "presets/smallest-pdf-for-email/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/smallest-pdf-for-email/images/fa/1.webp",
+          "presets/smallest-pdf-for-email/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/smallest-pdf-for-email/images/fr/1.webp",
+          "presets/smallest-pdf-for-email/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/smallest-pdf-for-email/images/hi/1.webp",
+          "presets/smallest-pdf-for-email/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/smallest-pdf-for-email/images/id/1.webp",
+          "presets/smallest-pdf-for-email/images/id/2.webp"
+        ],
+        "it": [
+          "presets/smallest-pdf-for-email/images/it/1.webp",
+          "presets/smallest-pdf-for-email/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/smallest-pdf-for-email/images/ja/1.webp",
+          "presets/smallest-pdf-for-email/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/smallest-pdf-for-email/images/ko/1.webp",
+          "presets/smallest-pdf-for-email/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/smallest-pdf-for-email/images/mn/1.webp",
+          "presets/smallest-pdf-for-email/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/smallest-pdf-for-email/images/ne/1.webp",
+          "presets/smallest-pdf-for-email/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/smallest-pdf-for-email/images/pl/1.webp",
+          "presets/smallest-pdf-for-email/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/smallest-pdf-for-email/images/pt-BR/1.webp",
+          "presets/smallest-pdf-for-email/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/smallest-pdf-for-email/images/pt-PT/1.webp",
+          "presets/smallest-pdf-for-email/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/smallest-pdf-for-email/images/ru/1.webp",
+          "presets/smallest-pdf-for-email/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/smallest-pdf-for-email/images/th/1.webp",
+          "presets/smallest-pdf-for-email/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/smallest-pdf-for-email/images/tr/1.webp",
+          "presets/smallest-pdf-for-email/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/smallest-pdf-for-email/images/vi/1.webp",
+          "presets/smallest-pdf-for-email/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/smallest-pdf-for-email/images/zh-CN/1.webp",
+          "presets/smallest-pdf-for-email/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/smallest-pdf-for-email/images/zh-TW/1.webp",
+          "presets/smallest-pdf-for-email/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/smallest-pdf-for-email/images/ar/1-thumb.webp",
+        "bn-BD": "presets/smallest-pdf-for-email/images/bn-BD/1-thumb.webp",
+        "de": "presets/smallest-pdf-for-email/images/de/1-thumb.webp",
+        "en": "presets/smallest-pdf-for-email/images/en/1-thumb.webp",
+        "es": "presets/smallest-pdf-for-email/images/es/1-thumb.webp",
+        "fa": "presets/smallest-pdf-for-email/images/fa/1-thumb.webp",
+        "fr": "presets/smallest-pdf-for-email/images/fr/1-thumb.webp",
+        "hi": "presets/smallest-pdf-for-email/images/hi/1-thumb.webp",
+        "id": "presets/smallest-pdf-for-email/images/id/1-thumb.webp",
+        "it": "presets/smallest-pdf-for-email/images/it/1-thumb.webp",
+        "ja": "presets/smallest-pdf-for-email/images/ja/1-thumb.webp",
+        "ko": "presets/smallest-pdf-for-email/images/ko/1-thumb.webp",
+        "mn": "presets/smallest-pdf-for-email/images/mn/1-thumb.webp",
+        "ne": "presets/smallest-pdf-for-email/images/ne/1-thumb.webp",
+        "pl": "presets/smallest-pdf-for-email/images/pl/1-thumb.webp",
+        "pt-BR": "presets/smallest-pdf-for-email/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/smallest-pdf-for-email/images/pt-PT/1-thumb.webp",
+        "ru": "presets/smallest-pdf-for-email/images/ru/1-thumb.webp",
+        "th": "presets/smallest-pdf-for-email/images/th/1-thumb.webp",
+        "tr": "presets/smallest-pdf-for-email/images/tr/1-thumb.webp",
+        "vi": "presets/smallest-pdf-for-email/images/vi/1-thumb.webp",
+        "zh-CN": "presets/smallest-pdf-for-email/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/smallest-pdf-for-email/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/smallest-pdf-for-email/preset.json",
+      "sha256": "6336aee2e742260b65dec47f8947aab0d397d1c80194a8dadc609c7b74d04876",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
+    {
+      "id": "vertical-video-for-reels-and-shorts",
+      "title": "Vertical 9:16 video for Reels and Shorts",
+      "description": "Cuts a landscape video to a centred 9:16 portrait frame for Instagram Reels, YouTube Shorts and TikTok, and saves it as an MP4 (H.264 and AAC) that every app takes, at most 1920 px tall. Keep the subject in the middle of the picture. Saved as name_vertical.mp4. Needs FFmpeg.",
+      "author": "KnifeLemon",
+      "tags": [
+        "video",
+        "social",
+        "resize"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "mp4"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 10,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/vertical-video-for-reels-and-shorts/images/1.webp",
+        "presets/vertical-video-for-reels-and-shorts/images/2.webp"
+      ],
+      "thumb": "presets/vertical-video-for-reels-and-shorts/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/vertical-video-for-reels-and-shorts/images/ar/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/vertical-video-for-reels-and-shorts/images/bn-BD/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/vertical-video-for-reels-and-shorts/images/de/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/de/2.webp"
+        ],
+        "en": [
+          "presets/vertical-video-for-reels-and-shorts/images/en/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/en/2.webp"
+        ],
+        "es": [
+          "presets/vertical-video-for-reels-and-shorts/images/es/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/vertical-video-for-reels-and-shorts/images/fa/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/vertical-video-for-reels-and-shorts/images/fr/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/vertical-video-for-reels-and-shorts/images/hi/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/vertical-video-for-reels-and-shorts/images/id/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/id/2.webp"
+        ],
+        "it": [
+          "presets/vertical-video-for-reels-and-shorts/images/it/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/vertical-video-for-reels-and-shorts/images/ja/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/vertical-video-for-reels-and-shorts/images/ko/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/vertical-video-for-reels-and-shorts/images/mn/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/vertical-video-for-reels-and-shorts/images/ne/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/vertical-video-for-reels-and-shorts/images/pl/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/vertical-video-for-reels-and-shorts/images/pt-BR/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/vertical-video-for-reels-and-shorts/images/pt-PT/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/vertical-video-for-reels-and-shorts/images/ru/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/vertical-video-for-reels-and-shorts/images/th/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/vertical-video-for-reels-and-shorts/images/tr/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/vertical-video-for-reels-and-shorts/images/vi/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/vertical-video-for-reels-and-shorts/images/zh-CN/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/vertical-video-for-reels-and-shorts/images/zh-TW/1.webp",
+          "presets/vertical-video-for-reels-and-shorts/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/vertical-video-for-reels-and-shorts/images/ar/1-thumb.webp",
+        "bn-BD": "presets/vertical-video-for-reels-and-shorts/images/bn-BD/1-thumb.webp",
+        "de": "presets/vertical-video-for-reels-and-shorts/images/de/1-thumb.webp",
+        "en": "presets/vertical-video-for-reels-and-shorts/images/en/1-thumb.webp",
+        "es": "presets/vertical-video-for-reels-and-shorts/images/es/1-thumb.webp",
+        "fa": "presets/vertical-video-for-reels-and-shorts/images/fa/1-thumb.webp",
+        "fr": "presets/vertical-video-for-reels-and-shorts/images/fr/1-thumb.webp",
+        "hi": "presets/vertical-video-for-reels-and-shorts/images/hi/1-thumb.webp",
+        "id": "presets/vertical-video-for-reels-and-shorts/images/id/1-thumb.webp",
+        "it": "presets/vertical-video-for-reels-and-shorts/images/it/1-thumb.webp",
+        "ja": "presets/vertical-video-for-reels-and-shorts/images/ja/1-thumb.webp",
+        "ko": "presets/vertical-video-for-reels-and-shorts/images/ko/1-thumb.webp",
+        "mn": "presets/vertical-video-for-reels-and-shorts/images/mn/1-thumb.webp",
+        "ne": "presets/vertical-video-for-reels-and-shorts/images/ne/1-thumb.webp",
+        "pl": "presets/vertical-video-for-reels-and-shorts/images/pl/1-thumb.webp",
+        "pt-BR": "presets/vertical-video-for-reels-and-shorts/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/vertical-video-for-reels-and-shorts/images/pt-PT/1-thumb.webp",
+        "ru": "presets/vertical-video-for-reels-and-shorts/images/ru/1-thumb.webp",
+        "th": "presets/vertical-video-for-reels-and-shorts/images/th/1-thumb.webp",
+        "tr": "presets/vertical-video-for-reels-and-shorts/images/tr/1-thumb.webp",
+        "vi": "presets/vertical-video-for-reels-and-shorts/images/vi/1-thumb.webp",
+        "zh-CN": "presets/vertical-video-for-reels-and-shorts/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/vertical-video-for-reels-and-shorts/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/vertical-video-for-reels-and-shorts/preset.json",
+      "sha256": "8141076dfe5d5a980b3c7e2707b4b15b223e391f541ba7e0f236c24636aad903",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
+    {
+      "id": "webp-for-websites",
+      "title": "WebP for websites",
+      "description": "Makes pictures light enough for a website or a blog: WebP at quality 80, at most 1920 px on the long edge (smaller pictures keep their size), metadata removed, colour profile kept. A typical photo ends up a tenth of its size or less. Transparent PNGs stay transparent. Saved next to the original as name_web.webp.",
+      "author": "KnifeLemon",
+      "tags": [
+        "images",
+        "web",
+        "compress",
+        "resize"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "webp"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [
+        {
+          "code": "strips_metadata",
+          "severity": "info"
+        }
+      ],
+      "created": "2026-11-14T20:59:19Z",
+      "updated": "2026-11-14T21:11:27Z",
+      "discussion": 11,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/webp-for-websites/images/1.webp",
+        "presets/webp-for-websites/images/2.webp"
+      ],
+      "thumb": "presets/webp-for-websites/images/1-thumb.webp",
+      "imagesByLang": {
+        "ar": [
+          "presets/webp-for-websites/images/ar/1.webp",
+          "presets/webp-for-websites/images/ar/2.webp"
+        ],
+        "bn-BD": [
+          "presets/webp-for-websites/images/bn-BD/1.webp",
+          "presets/webp-for-websites/images/bn-BD/2.webp"
+        ],
+        "de": [
+          "presets/webp-for-websites/images/de/1.webp",
+          "presets/webp-for-websites/images/de/2.webp"
+        ],
+        "en": [
+          "presets/webp-for-websites/images/en/1.webp",
+          "presets/webp-for-websites/images/en/2.webp"
+        ],
+        "es": [
+          "presets/webp-for-websites/images/es/1.webp",
+          "presets/webp-for-websites/images/es/2.webp"
+        ],
+        "fa": [
+          "presets/webp-for-websites/images/fa/1.webp",
+          "presets/webp-for-websites/images/fa/2.webp"
+        ],
+        "fr": [
+          "presets/webp-for-websites/images/fr/1.webp",
+          "presets/webp-for-websites/images/fr/2.webp"
+        ],
+        "hi": [
+          "presets/webp-for-websites/images/hi/1.webp",
+          "presets/webp-for-websites/images/hi/2.webp"
+        ],
+        "id": [
+          "presets/webp-for-websites/images/id/1.webp",
+          "presets/webp-for-websites/images/id/2.webp"
+        ],
+        "it": [
+          "presets/webp-for-websites/images/it/1.webp",
+          "presets/webp-for-websites/images/it/2.webp"
+        ],
+        "ja": [
+          "presets/webp-for-websites/images/ja/1.webp",
+          "presets/webp-for-websites/images/ja/2.webp"
+        ],
+        "ko": [
+          "presets/webp-for-websites/images/ko/1.webp",
+          "presets/webp-for-websites/images/ko/2.webp"
+        ],
+        "mn": [
+          "presets/webp-for-websites/images/mn/1.webp",
+          "presets/webp-for-websites/images/mn/2.webp"
+        ],
+        "ne": [
+          "presets/webp-for-websites/images/ne/1.webp",
+          "presets/webp-for-websites/images/ne/2.webp"
+        ],
+        "pl": [
+          "presets/webp-for-websites/images/pl/1.webp",
+          "presets/webp-for-websites/images/pl/2.webp"
+        ],
+        "pt-BR": [
+          "presets/webp-for-websites/images/pt-BR/1.webp",
+          "presets/webp-for-websites/images/pt-BR/2.webp"
+        ],
+        "pt-PT": [
+          "presets/webp-for-websites/images/pt-PT/1.webp",
+          "presets/webp-for-websites/images/pt-PT/2.webp"
+        ],
+        "ru": [
+          "presets/webp-for-websites/images/ru/1.webp",
+          "presets/webp-for-websites/images/ru/2.webp"
+        ],
+        "th": [
+          "presets/webp-for-websites/images/th/1.webp",
+          "presets/webp-for-websites/images/th/2.webp"
+        ],
+        "tr": [
+          "presets/webp-for-websites/images/tr/1.webp",
+          "presets/webp-for-websites/images/tr/2.webp"
+        ],
+        "vi": [
+          "presets/webp-for-websites/images/vi/1.webp",
+          "presets/webp-for-websites/images/vi/2.webp"
+        ],
+        "zh-CN": [
+          "presets/webp-for-websites/images/zh-CN/1.webp",
+          "presets/webp-for-websites/images/zh-CN/2.webp"
+        ],
+        "zh-TW": [
+          "presets/webp-for-websites/images/zh-TW/1.webp",
+          "presets/webp-for-websites/images/zh-TW/2.webp"
+        ]
+      },
+      "thumbByLang": {
+        "ar": "presets/webp-for-websites/images/ar/1-thumb.webp",
+        "bn-BD": "presets/webp-for-websites/images/bn-BD/1-thumb.webp",
+        "de": "presets/webp-for-websites/images/de/1-thumb.webp",
+        "en": "presets/webp-for-websites/images/en/1-thumb.webp",
+        "es": "presets/webp-for-websites/images/es/1-thumb.webp",
+        "fa": "presets/webp-for-websites/images/fa/1-thumb.webp",
+        "fr": "presets/webp-for-websites/images/fr/1-thumb.webp",
+        "hi": "presets/webp-for-websites/images/hi/1-thumb.webp",
+        "id": "presets/webp-for-websites/images/id/1-thumb.webp",
+        "it": "presets/webp-for-websites/images/it/1-thumb.webp",
+        "ja": "presets/webp-for-websites/images/ja/1-thumb.webp",
+        "ko": "presets/webp-for-websites/images/ko/1-thumb.webp",
+        "mn": "presets/webp-for-websites/images/mn/1-thumb.webp",
+        "ne": "presets/webp-for-websites/images/ne/1-thumb.webp",
+        "pl": "presets/webp-for-websites/images/pl/1-thumb.webp",
+        "pt-BR": "presets/webp-for-websites/images/pt-BR/1-thumb.webp",
+        "pt-PT": "presets/webp-for-websites/images/pt-PT/1-thumb.webp",
+        "ru": "presets/webp-for-websites/images/ru/1-thumb.webp",
+        "th": "presets/webp-for-websites/images/th/1-thumb.webp",
+        "tr": "presets/webp-for-websites/images/tr/1-thumb.webp",
+        "vi": "presets/webp-for-websites/images/vi/1-thumb.webp",
+        "zh-CN": "presets/webp-for-websites/images/zh-CN/1-thumb.webp",
+        "zh-TW": "presets/webp-for-websites/images/zh-TW/1-thumb.webp"
+      },
+      "preset": "presets/webp-for-websites/preset.json",
+      "sha256": "d271659f9c8ce5545dc08453809866edc4c0606004c47b576edbb303c1f4b051",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    }
+  ]
 }
