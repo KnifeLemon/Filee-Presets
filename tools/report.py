@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import CHECK_MARKER, defang  # noqa: E402
 
 LABELS = ["ready", "needs-review", "needs-changes"]
+SEVERITY_TEXT = {"high": "**High**", "medium": "Medium", "info": "Info"}
 FLAG_TEXT = {
     "spam": "Spam or placeholder",
     "offensive": "Offensive content",
@@ -62,8 +63,12 @@ def status_of(report: dict) -> tuple[str, str]:
 def render(report: dict, verdict: dict | None, label: str) -> str:
     lines = [CHECK_MARKER, "## Preset check", ""]
     slug = report.get("slug")
+    presets = [p for p in report.get("presets") or [] if isinstance(p, dict)]
     if slug:
         lines.append(f"Folder: `presets/{defang(slug, 48)}/` ({defang(report.get('mode') or '?', 10)})")
+        lines.append("")
+    elif len(presets) > 1:
+        lines.append(f"{len(presets)} preset folders, each checked on its own (allowed for repository owners and members).")
         lines.append("")
     errors = report.get("errors") or []
     if report.get("incomplete"):
@@ -73,6 +78,13 @@ def render(report: dict, verdict: dict | None, label: str) -> str:
     else:
         lines.append(f"**Rules:** {len(errors)} problem(s) to fix:")
         lines += [f"- {defang(e.get('message', ''), 400)}" for e in errors[:30]]
+    for p in presets:
+        can = ((p.get("derived") or {}).get("warnings") or [])[:20]
+        if can:
+            name = f" (`{defang(p.get('slug', ''), 48)}`)" if len(presets) > 1 else ""
+            lines += ["", f"**This preset can{name}:** (shown to people before they install it)"]
+            lines += [f"- {SEVERITY_TEXT.get(w.get('severity'), 'Note')}: {defang(w.get('message', ''), 300)} "
+                      f"(`{defang(w.get('code', ''), 48)}`)" for w in can]
     warnings = report.get("warnings") or []
     if warnings:
         lines += ["", "**Needs a maintainer:**"] + [f"- {defang(w.get('message', ''), 300)}" for w in warnings[:10]]

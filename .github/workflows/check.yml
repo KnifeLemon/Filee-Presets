@@ -56,6 +56,7 @@ jobs:
       called: ${{ steps.ctx.outputs.called }}
       review: ${{ steps.ctx.outputs.review }}
       report: ${{ steps.ctx.outputs.report }}
+      assoc: ${{ steps.ctx.outputs.assoc }}
     steps:
       - id: ctx
         env:
@@ -68,15 +69,16 @@ jobs:
           HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           PR_USER_TYPE: ${{ github.event.pull_request.user.type }}
+          PR_ASSOC: ${{ github.event.pull_request.author_association }}
         run: |
           called=false
           if [ -n "$CALL_PR" ]; then
-            pr="$CALL_PR"; sha="$CALL_SHA"; called=true; review=true; report=true
+            pr="$CALL_PR"; sha="$CALL_SHA"; called=true; review=true; report=true; assoc=NONE
           elif [ "$EVENT" = "issue_comment" ]; then
             pr="$PR_NUMBER"; review=true; report=true
-            sha=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq .head.sha)
+            read -r sha assoc < <(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq '.head.sha + " " + .author_association')
           else
-            pr="$PR_NUMBER"; sha="$PR_SHA"
+            pr="$PR_NUMBER"; sha="$PR_SHA"; assoc="$PR_ASSOC"
             same_repo=false
             [ "$HEAD_REPO" = "$GITHUB_REPOSITORY" ] && same_repo=true
             review=false
@@ -85,12 +87,15 @@ jobs:
             esac
             report=$same_repo
           fi
+          # Only owners and members may send several presets in one pull request (tools/check.py).
+          printf '%s' "$assoc" | grep -Eq '^[A-Z_]{1,30}$' || assoc=NONE
           if ! printf '%s' "$pr" | grep -Eq '^[0-9]{1,9}$' || ! printf '%s' "$sha" | grep -Eq '^[0-9a-f]{40}$'; then
             echo "::error::No valid pull request number or head commit."
             exit 1
           fi
           {
             echo "pr=$pr"; echo "sha=$sha"; echo "called=$called"; echo "review=$review"; echo "report=$report"
+            echo "assoc=$assoc"
           } >> "$GITHUB_OUTPUT"
 
   rules:
@@ -150,9 +155,12 @@ jobs:
 
       - name: Check the rules
         id: check
+        env:
+          ASSOC: ${{ needs.context.outputs.assoc }}
         run: |
           python base/tools/check.py --base base --pr pr --changed "$RUNNER_TEMP/changed.json" \
-            --out "$RUNNER_TEMP/check" --cli "dotnet $RUNNER_TEMP/filee-cli/filee-cli.dll"
+            --out "$RUNNER_TEMP/check" --cli "dotnet $RUNNER_TEMP/filee-cli/filee-cli.dll" \
+            --author-association "$ASSOC"
           ok=$(python -c 'import json,sys; print(str(json.load(open(sys.argv[1]))["ok"]).lower())' "$RUNNER_TEMP/check/report.json")
           echo "ok=$ok" >> "$GITHUB_OUTPUT"
 

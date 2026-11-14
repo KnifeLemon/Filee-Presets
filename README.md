@@ -29,16 +29,21 @@ there too.
 
 ## Rules
 
-Allowed: conversion presets, tool presets and toolbars (donut profiles) that Filee can export.
+Allowed: conversion presets, tool presets and toolbars (donut profiles) that Filee can export, including settings
+that need care, such as replacing or moving the original file, overwriting existing files, copying to a folder,
+editing or removing metadata, or using a translation model. Filee's validator lists these as **warnings** (high,
+medium or info). They are saved with the preset, shown in the pull request's check comment, and shown in the app
+and on filee.sh before anyone installs it.
 
 Not allowed, and rejected by the checks:
 
-- "Run a program" presets and anything else that runs a command.
-- Absolute or personal output folders (`C:\Users\...`, `/home/...`, `/Users/...`), `..` in paths, and file name
-  patterns that could leave the output folder. Shared presets save next to the source file.
-- Proxy, network or web settings; translate or AI settings with custom endpoints or API keys.
-- Metadata presets that write an author name or GPS position.
-- Links in the title or description, spam, ads, offensive or misleading content.
+- Programs and commands: "Run a program" presets and anything else that runs a command.
+- Secrets: API keys, tokens, passwords, custom endpoints with credentials.
+- Personal paths and data: absolute or personal folders (`C:\Users\...`, `/home/...`, `/Users/...`), `..` in paths,
+  file name patterns that could leave the output folder, and names, e-mail addresses or GPS positions written into
+  files.
+- Links in the title or description, spam, ads, offensive or misleading content (a description that hides what the
+  warnings say counts as misleading).
 - Images showing personal information: real names, faces, addresses, document contents or file paths. Images you
   didn't make yourself.
 

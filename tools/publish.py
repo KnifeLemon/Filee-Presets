@@ -128,13 +128,15 @@ def publish_one(root: Path, folder: Path, tags: list[str], cli: str, discussions
     updated["kinds"] = derived["kinds"]
     updated["formats"] = derived["formats"]
     updated["minVersion"] = derived["minVersion"]
+    if derived.get("warnings") is not None:
+        updated["warnings"] = [{"code": w["code"], "severity": w["severity"]} for w in derived["warnings"]]
     updated["created"] = meta.get("created") or (iso(times[-1]) if times else now())
     updated["updated"] = iso(times[0]) if times else updated["created"]
     if updated["updated"] < updated["created"]:
         updated["updated"] = updated["created"]
     if updated.get("discussion") is None and discussions is not None:
         updated["discussion"] = discussions.ensure(updated)
-    updated = {k: updated[k] for k in META_KEYS}
+    updated = {k: updated[k] for k in META_KEYS if k in updated}
     if updated != meta:
         write_json(folder / "meta.json", updated)
     errors = rules.check_meta(read_json(folder / "meta.json", MAX_META_BYTES), slug, tags, published=True)
@@ -142,6 +144,7 @@ def publish_one(root: Path, folder: Path, tags: list[str], cli: str, discussions
         return None, errors
     images = sorted((folder / "images").glob("[1-4].webp"))
     entry = dict(updated)
+    entry.setdefault("warnings", [])
     entry["images"] = [p.relative_to(root).as_posix() for p in images]
     entry["thumb"] = f"presets/{slug}/images/1-thumb.webp"
     entry["preset"] = f"presets/{slug}/preset.json"

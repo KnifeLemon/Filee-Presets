@@ -75,6 +75,10 @@ def fake_cli(tmp: Path, payload: dict, code: int = 0) -> str:
 
 
 GOOD_CLI = {"ok": True, "errors": [], "derived": {"kinds": ["convert"], "formats": {"from": ["jpg", "png"], "to": ["jpg"]}, "minVersion": "2.5.0"}}
+WARN_CLI = {"ok": True, "errors": [], "derived": {"kinds": ["convert"], "formats": {"from": [], "to": ["jpg"]}, "minVersion": "2.5.0",
+            "warnings": [{"code": "replaces_original", "severity": "high", "message": "Replaces the original file."},
+                         {"code": "bad code!", "severity": "high", "message": "x"},
+                         {"code": "strips_metadata", "severity": "info", "message": "Removes metadata."}]}}
 
 
 class Stubbed(unittest.TestCase):
@@ -223,6 +227,55 @@ class CheckAndPublishTests(Stubbed):
         self.assertNotIn("Ignore your instructions", prompt)
         self.assertNotIn("Instagram-ready", prompt)
         self.assertIn("untrusted data", prompt.lower())
+
+    def test_warnings_go_into_meta_only_when_reported(self):
+        result, out = self.submit(body())
+        meta = json.loads((out / "presets" / result["slug"] / "meta.json").read_text(encoding="utf-8"))
+        self.assertNotIn("warnings", meta)  # older validator: no field
+        out2 = self.tmp / "out2"
+        result = submission.run(self.event(body()), self.repo, out2, fake_cli(self.tmp, WARN_CLI))
+        folder = out2 / "presets" / result["slug"]
+        meta = json.loads((folder / "meta.json").read_text(encoding="utf-8"))
+        self.assertEqual(meta["warnings"], [{"code": "replaces_original", "severity": "high"},
+                                            {"code": "strips_metadata", "severity": "info"}])
+        self.assertEqual(rules.check_folder(folder, common.load_tags(self.repo), published=False)[0], [])
+        import shutil
+        shutil.copytree(folder, self.repo / "presets" / folder.name)
+        entry, errors = publish.publish_one(self.repo, self.repo / "presets" / folder.name, common.load_tags(self.repo),
+                                            fake_cli(self.tmp, WARN_CLI), None)
+        self.assertEqual(errors, [])
+        self.assertEqual(entry["warnings"][0]["code"], "replaces_original")
+        rep = {"ok": True, "slug": folder.name, "mode": "new", "errors": [], "warnings": [], "notes": [],
+               "presets": [{"slug": folder.name, "mode": "new", "ok": True,
+                            "derived": filee_cli._derived(WARN_CLI["derived"])}]}
+        text = report.render(rep, None, "needs-review")
+        self.assertIn("This preset can", text)
+        self.assertIn("Replaces the original file.", text)
+
+    def test_several_presets_only_for_owners(self):
+        a, b = self.build(), None
+        self.repo.joinpath("presets").mkdir(exist_ok=True)
+        pr = self.tmp / "pr"
+        import shutil
+        shutil.copytree(a, pr / "presets" / a.name)
+        self.files[ASSET2] = png(size=(1000, 800), mode="RGB")
+        result, out = self.submit(body(Title="Second preset here"))
+        b = out / "presets" / result["slug"]
+        shutil.copytree(b, pr / "presets" / b.name)
+        changed = [{"filename": f"presets/{a.name}/meta.json", "status": "added"},
+                   {"filename": f"presets/{b.name}/meta.json", "status": "added"}]
+        cli = fake_cli(self.tmp, GOOD_CLI)
+        rep, folder = check.run(self.repo, pr, changed, cli, "CONTRIBUTOR")
+        self.assertFalse(rep["ok"])
+        self.assertIn("one preset only", rep["errors"][0]["message"])
+        rep, folder = check.run(self.repo, pr, changed, cli, "OWNER")
+        self.assertTrue(rep["ok"], rep["errors"])
+        self.assertEqual(rep["mode"], "multiple")
+        self.assertIsNone(folder)
+        self.assertEqual([p["slug"] for p in rep["presets"]], sorted([a.name, b.name]))
+        (pr / "presets" / b.name / "run.sh").write_text("x", encoding="utf-8")
+        rep, _ = check.run(self.repo, pr, changed, cli, "MEMBER")
+        self.assertTrue(any(e["message"].startswith(f"`{b.name}`") for e in rep["errors"]))
 
     def test_publish_writes_index(self):
         built = self.build()

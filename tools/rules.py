@@ -13,7 +13,7 @@ import images
 from common import (
     DESC_MAX, DESC_MIN, FORMAT_ID_RE, HTML_RE, ISO_RE, KINDS, LANGUAGES, LICENSE, LINK_RE, LOGIN_RE,
     MAX_IMAGES, MAX_LANGUAGES, MAX_META_BYTES, MAX_PRESET_BYTES, MAX_TAGS, META_KEYS, RESERVED_SLUGS, SLUG_RE,
-    TITLE_MAX, TITLE_MIN, VERSION_RE, read_json,
+    MAX_WARNINGS, SEVERITIES, TITLE_MAX, TITLE_MIN, VERSION_RE, WARNING_CODE_RE, read_json,
 )
 
 IMAGE_NAME_RE = re.compile(r"^([1-4])(-thumb)?\.webp$")
@@ -90,7 +90,8 @@ def check_meta(meta, slug: str, tags: list[str], *, published: bool) -> list[dic
         return [err("meta", "meta.json must be a JSON object.")]
     errors = []
     keys = list(meta.keys())
-    optional = set() if published else {"created", "updated"}
+    # `warnings` is left out when the validator that published the preset didn't report any field for it.
+    optional = {"warnings"} if published else {"created", "updated", "warnings"}
     missing = [k for k in META_KEYS if k not in meta and k not in optional]
     extra = [k for k in keys if k not in META_KEYS]
     if missing:
@@ -139,6 +140,13 @@ def check_meta(meta, slug: str, tags: list[str], *, published: bool) -> list[dic
         value = meta.get(key)
         if not isinstance(value, str) or not ISO_RE.match(value):
             errors.append(err("meta", f"`{key}` must be a UTC time like 2026-11-15T00:00:00Z."))
+    if "warnings" in meta:
+        warns = meta["warnings"]
+        if not isinstance(warns, list) or len(warns) > MAX_WARNINGS or not all(
+            isinstance(w, dict) and set(w) == {"code", "severity"} and isinstance(w["code"], str)
+            and WARNING_CODE_RE.match(w["code"]) and w["severity"] in SEVERITIES for w in warns
+        ):
+            errors.append(err("meta", "`warnings` must be a list of {\"code\", \"severity\"} from Filee's validator."))
     disc = meta.get("discussion")
     if not (disc is None or (isinstance(disc, int) and not isinstance(disc, bool) and disc > 0)):
         errors.append(err("meta", "`discussion` must be a discussion number or null."))

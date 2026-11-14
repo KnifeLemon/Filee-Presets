@@ -5,7 +5,8 @@ the [README](README.md). This page is for pull requests by hand, the checks in d
 
 ## Pull requests by hand
 
-A preset pull request adds or changes exactly one `presets/<slug>/` folder and nothing else:
+A preset pull request adds or changes exactly one `presets/<slug>/` folder and nothing else (repository owners and
+members may send several folders in one pull request; each is still checked on its own):
 
 - `preset.json`: the file Filee's **Settings > General > Export** writes. At most 20 presets and 1 toolbar,
   at most 256 KB.
@@ -24,6 +25,7 @@ A preset pull request adds or changes exactly one `presets/<slug>/` folder and n
 | `tags` | 0-6 ids from [tags.json](tags.json) |
 | `languages` | 1-6 of the codes Filee's UI uses (`en`, `ko`, `ja`, `zh-CN`, ...) |
 | `kinds`, `formats`, `minVersion` | what `filee presets check` derives |
+| `warnings` | `[{"code", "severity"}]` from `filee presets check`: what the preset can do that people see before installing (left out with older validators) |
 | `created`, `updated`, `discussion` | set by CI on main (leave out / `null`) |
 | `license` | `CC0-1.0` |
 

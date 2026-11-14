@@ -108,8 +108,9 @@ body:
       description: |
         In Filee, open Settings > General > **Export**, pick the presets (and toolbar, if you want), and save
         `filee-presets.json`. Then **drag that file into this box** (or click the box and paste it, or use the
-        attach button below the box). One file only. "Run a program" presets, personal paths and network settings
-        are not allowed.
+        attach button below the box). One file only. Programs and commands, secrets (keys, tokens) and personal
+        paths are not allowed. Settings that need care (such as replacing the original file) are allowed and are
+        shown to people as warnings.
       placeholder: Drag filee-presets.json here
     validations:
       required: true

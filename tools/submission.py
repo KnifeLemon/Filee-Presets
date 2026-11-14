@@ -25,8 +25,8 @@ import fetch  # noqa: E402
 import images  # noqa: E402
 from common import (  # noqa: E402
     DESC_MAX, DESC_MIN, HTML_RE, LANGUAGES, LICENSE, LINK_RE, LOGIN_RE, MAX_IMAGES, MAX_LANGUAGES,
-    MAX_PRESET_BYTES, MAX_TAGS, MIN_IMAGES, RESERVED_SLUGS, SLUG_RE, TITLE_MAX, TITLE_MIN, clean_text, load_tags,
-    slugify, write_json,
+    MAX_PRESET_BYTES, MAX_TAGS, META_KEYS, MIN_IMAGES, RESERVED_SLUGS, SLUG_RE, TITLE_MAX, TITLE_MIN, clean_text,
+    load_tags, slugify, write_json,
 )
 
 # The issue form's field labels (.github/ISSUE_TEMPLATE/submit-preset.yml). Keep both in sync.
@@ -197,7 +197,7 @@ def run(event_path: Path, repo: Path, out: Path, cli: str) -> dict:
         (folder / "images" / f"{i}.webp").write_bytes(full)
         (folder / "images" / f"{i}-thumb.webp").write_bytes(thumb)
 
-    derived = {"kinds": [], "formats": {"from": [], "to": []}, "minVersion": None}
+    derived = {"kinds": [], "formats": {"from": [], "to": []}, "minVersion": None, "warnings": None}
     if cli:
         check = filee_cli.check(folder, cli)
         if not check["ok"]:
@@ -206,7 +206,7 @@ def run(event_path: Path, repo: Path, out: Path, cli: str) -> dict:
             return result
         derived = check["derived"]
 
-    write_json(folder / "meta.json", {
+    meta = {
         "id": slug,
         "title": form["title"],
         "description": form["description"],
@@ -218,8 +218,11 @@ def run(event_path: Path, repo: Path, out: Path, cli: str) -> dict:
         "minVersion": derived["minVersion"],
         "discussion": None,
         "license": LICENSE,
-    })
-    result.update(ok=True, slug=slug, title=form["title"])
+    }
+    if derived.get("warnings") is not None:  # older validators don't report warnings; then the field is left out
+        meta["warnings"] = [{"code": w["code"], "severity": w["severity"]} for w in derived["warnings"]]
+    write_json(folder / "meta.json", {k: meta[k] for k in META_KEYS if k in meta})
+    result.update(ok=True, slug=slug, title=form["title"], warnings=derived.get("warnings") or [])
     return result
 
 

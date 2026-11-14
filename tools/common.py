@@ -36,6 +36,10 @@ MAX_PRESET_BYTES = 256 * 1024
 MAX_META_BYTES = 8 * 1024
 LICENSE = "CC0-1.0"
 KINDS = {"convert", "tool", "toolbar"}
+# derived.warnings from Filee's validator: what a preset can do that people should know before installing it.
+WARNING_CODE_RE = re.compile(r"^[a-z][a-z0-9_]{1,47}$")
+SEVERITIES = ("high", "medium", "info")
+MAX_WARNINGS = 20
 
 # Languages a title/description can be written in: the Filee app's UI languages.
 LANGUAGES = [
@@ -44,7 +48,7 @@ LANGUAGES = [
 ]
 
 META_KEYS = [
-    "id", "title", "description", "author", "tags", "languages", "kinds", "formats", "minVersion",
+    "id", "title", "description", "author", "tags", "languages", "kinds", "formats", "minVersion", "warnings",
     "created", "updated", "discussion", "license",
 ]
 

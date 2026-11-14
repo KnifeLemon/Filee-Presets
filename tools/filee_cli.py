@@ -11,7 +11,7 @@ import shlex
 import subprocess
 from pathlib import Path
 
-from common import FORMAT_ID_RE, KINDS, VERSION_RE
+from common import FORMAT_ID_RE, KINDS, SEVERITIES, VERSION_RE, WARNING_CODE_RE
 
 TIMEOUT = 300
 
@@ -71,7 +71,22 @@ def _derived(data) -> dict | None:
         "kinds": sorted(set(kinds)),
         "formats": {"from": ids(formats.get("from")), "to": ids(formats.get("to"))},
         "minVersion": min_version,
+        "warnings": _warnings(data["warnings"]) if "warnings" in data else None,
     }
+
+
+def _warnings(items) -> list[dict]:
+    """What the preset can do that people should know before installing it (`derived.warnings`). Older validators
+    don't send the field; then `warnings` is None and meta.json leaves it out."""
+    out = []
+    for item in items[:20] if isinstance(items, list) else []:
+        if not isinstance(item, dict):
+            continue
+        code, severity = item.get("code"), item.get("severity")
+        if isinstance(code, str) and WARNING_CODE_RE.match(code) and severity in SEVERITIES:
+            if not any(w["code"] == code for w in out):
+                out.append({"code": code, "severity": severity, "message": str(item.get("message") or code)[:300]})
+    return out
 
 
 def check(folder: Path, cli: str) -> dict:
