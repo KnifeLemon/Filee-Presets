@@ -1,0 +1,26 @@
+{
+  "id": "podcast-voice-mp3",
+  "title": "Podcast voice MP3 (mono)",
+  "description": "Turns voice recordings (WAV, M4A, phone memos, the sound of a video) into a mono MP3 at 96 kbit/s, a common choice for spoken podcasts and voice notes: about 43 MB per hour, and it plays everywhere. Music sounds better in stereo, so use it for speech. Saved as name_podcast.mp3. Needs FFmpeg.",
+  "author": "KnifeLemon",
+  "tags": [
+    "audio",
+    "compress"
+  ],
+  "languages": [
+    "en"
+  ],
+  "kinds": [
+    "convert"
+  ],
+  "formats": {
+    "from": [],
+    "to": [
+      "mp3"
+    ]
+  },
+  "minVersion": "2.5.0",
+  "warnings": [],
+  "discussion": null,
+  "license": "CC0-1.0"
+}
