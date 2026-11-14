@@ -1,0 +1,158 @@
+# Submission issue -> pull request.
+#
+# 1. build (read-only GITHUB_TOKEN): reads the issue from the event payload FILE (never interpolated into a shell),
+#    downloads only its github.com/user-attachments files, re-encodes the images, runs Filee's validator and builds
+#    presets/<slug>/. The result is handed over as an artifact.
+# 2. pull-request (GitHub App token): re-checks the built folder, pushes branch submission/issue-<n>, opens or updates
+#    the pull request and answers on the issue. The App token is used so the pull request triggers the check
+#    workflow (pull requests opened with GITHUB_TOKEN don't trigger workflows).
+name: Submission
+
+on:
+  issues:
+    types: [opened, edited, reopened, labeled]
+
+permissions: {}
+
+concurrency:
+  group: submission-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: >-
+      github.event.issue.state == 'open' &&
+      contains(github.event.issue.labels.*.name, 'submission') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'submission')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the gallery (main)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: gallery
+          persist-credentials: false
+
+      - name: Check out Filee (for its validator)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: KnifeLemon/Filee
+          ref: ${{ vars.FILEE_REF || 'feat/preset-gallery' }}
+          path: filee
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: filee/global.json
+
+      - name: Install tools
+        run: python -m pip install --disable-pip-version-check -r gallery/tools/requirements.txt
+
+      - name: Build the Filee validator
+        run: dotnet build filee/src/Filee.Cli -c Release -o "$RUNNER_TEMP/filee-cli" -v quiet -nologo
+
+      - name: Build the preset folder
+        run: >-
+          python gallery/tools/submission.py
+          --event "$GITHUB_EVENT_PATH"
+          --repo gallery
+          --out "$RUNNER_TEMP/submission"
+          --cli "dotnet $RUNNER_TEMP/filee-cli/filee-cli.dll"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: submission
+          path: ${{ runner.temp }}/submission
+          retention-days: 3
+          if-no-files-found: error
+
+  pull-request:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check the bot is set up
+        env:
+          APP_ID: ${{ secrets.PRESETS_BOT_APP_ID }}
+          APP_KEY: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
+        run: |
+          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
+            echo "::error title=Bot not set up::The secrets PRESETS_BOT_APP_ID and PRESETS_BOT_PRIVATE_KEY are missing. Create the filee-presets-bot GitHub App, install it on this repository and add both secrets (see CONTRIBUTING.md > Maintainers)."
+            exit 1
+          fi
+
+      - name: Get the bot token
+        id: bot
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.PRESETS_BOT_APP_ID }}
+          private-key: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+
+      - name: Check out the gallery (main)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: gallery
+          token: ${{ steps.bot.outputs.token }}
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: python -m pip install --disable-pip-version-check -r gallery/tools/requirements.txt
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: submission
+          path: ${{ runner.temp }}/submission
+
+      - name: Open or update the pull request
+        env:
+          GH_TOKEN: ${{ steps.bot.outputs.token }}
+          APP_SLUG: ${{ steps.bot.outputs.app-slug }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          user_id=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" "$GITHUB_API_URL/users/${APP_SLUG}%5Bbot%5D" | python -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+          export BOT_NAME="${APP_SLUG}[bot]"
+          export BOT_EMAIL="${user_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+          python gallery/tools/open_pr.py --result "$RUNNER_TEMP/submission" --repo gallery --issue "$ISSUE"
+
+  # Tells the submitter when the bot itself broke (validator build, network, a bug), so the issue isn't left silent.
+  on-failure:
+    needs: [build, pull-request]
+    if: failure()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Get the bot token
+        id: bot
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.PRESETS_BOT_APP_ID }}
+          private-key: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
+          permission-issues: write
+
+      - name: Comment on the issue
+        env:
+          GH_TOKEN: ${{ steps.bot.outputs.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          body=$(printf '%s\n%s' '<!-- filee-presets-submission -->' "The submission bot ran into a problem of its own ([log]($RUN_URL)). Nothing is wrong with your files as far as we know; a maintainer will look and run it again.")
+          python -c 'import json,sys; print(json.dumps({"body": sys.argv[1]}))' "$body" |
+            curl -fsS -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments" -d @- > /dev/null

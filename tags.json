@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "tags": [
+    {
+      "id": "images",
+      "description": "Photos and pictures (JPG, PNG, WebP, HEIC ...)"
+    },
+    {
+      "id": "documents",
+      "description": "Office, HWP and text documents"
+    },
+    {
+      "id": "pdf",
+      "description": "Making, merging or changing PDFs"
+    },
+    {
+      "id": "video",
+      "description": "Video files"
+    },
+    {
+      "id": "audio",
+      "description": "Music, voice and sound"
+    },
+    {
+      "id": "archives",
+      "description": "ZIP, 7Z, TAR and other archives"
+    },
+    {
+      "id": "ebooks",
+      "description": "EPUB and other e-books"
+    },
+    {
+      "id": "vector",
+      "description": "SVG and other vector graphics, tracing"
+    },
+    {
+      "id": "cad",
+      "description": "DWG and DXF drawings"
+    },
+    {
+      "id": "fonts",
+      "description": "Font files"
+    },
+    {
+      "id": "social",
+      "description": "Ready for social media sizes and formats"
+    },
+    {
+      "id": "web",
+      "description": "Small files for websites"
+    },
+    {
+      "id": "print",
+      "description": "Print-ready output"
+    },
+    {
+      "id": "compress",
+      "description": "Smaller files"
+    },
+    {
+      "id": "resize",
+      "description": "Changes the size or resolution"
+    },
+    {
+      "id": "quality",
+      "description": "Keeps the best possible quality"
+    },
+    {
+      "id": "watermark",
+      "description": "Adds a watermark or stamp"
+    },
+    {
+      "id": "merge",
+      "description": "Combines several files into one"
+    },
+    {
+      "id": "split",
+      "description": "Splits one file into several"
+    },
+    {
+      "id": "ocr",
+      "description": "Recognises text in images or scans"
+    },
+    {
+      "id": "translate",
+      "description": "Offline translation"
+    },
+    {
+      "id": "upscale",
+      "description": "AI image upscaling"
+    },
+    {
+      "id": "transparency",
+      "description": "Keeps or removes transparent backgrounds"
+    },
+    {
+      "id": "batch",
+      "description": "Made for converting many files at once"
+    },
+    {
+      "id": "toolbar",
+      "description": "A whole donut toolbar profile"
+    },
+    {
+      "id": "work",
+      "description": "Office and everyday work"
+    },
+    {
+      "id": "school",
+      "description": "School and studying"
+    },
+    {
+      "id": "design",
+      "description": "Design and illustration work"
+    }
+  ]
+}

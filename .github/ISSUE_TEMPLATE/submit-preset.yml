@@ -1,0 +1,137 @@
+# The field labels below are read by tools/submission.py. Change a label there too, and keep the Tags options in
+# sync with tags.json and the Languages options with LANGUAGES in tools/common.py (tools/tests checks both).
+name: Submit a preset
+description: Share a Filee preset or toolbar with everyone. A bot turns this into a pull request.
+title: "Preset: "
+labels: ["submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing! Fill in the fields, attach your files, and submit. A bot checks everything and opens a
+        pull request; a maintainer merges it. To change something later, **edit this issue** and the pull request
+        follows.
+
+        Everything you submit is published under **CC0 1.0** (public domain): anyone may use, change and share it.
+        Your GitHub name is shown as the author. Rules: [README](https://github.com/KnifeLemon/Filee-Presets#rules).
+
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: 3 to 60 characters. Say what it does, for example "Instagram-ready JPG".
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: 10 to 600 characters of plain text, no links. What does it convert, and to what? Which options matter?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: languages
+    attributes:
+      label: Languages
+      description: The language(s) you wrote the title and description in.
+      multiple: true
+      options:
+        - English (en)
+        - 한국어 (ko)
+        - 日本語 (ja)
+        - 简体中文 (zh-CN)
+        - 繁體中文 (zh-TW)
+        - Deutsch (de)
+        - Español (es)
+        - Français (fr)
+        - Italiano (it)
+        - Polski (pl)
+        - Português do Brasil (pt-BR)
+        - Português europeu (pt-PT)
+        - Русский (ru)
+        - Türkçe (tr)
+        - Tiếng Việt (vi)
+        - ไทย (th)
+        - Bahasa Indonesia (id)
+        - हिन्दी (hi)
+        - বাংলা (bn-BD)
+        - नेपाली (ne)
+        - العربية (ar)
+        - فارسی (fa)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tags
+    attributes:
+      label: Tags
+      description: Up to 6. Optional; the review may suggest more.
+      multiple: true
+      options:
+        - images
+        - documents
+        - pdf
+        - video
+        - audio
+        - archives
+        - ebooks
+        - vector
+        - cad
+        - fonts
+        - social
+        - web
+        - print
+        - compress
+        - resize
+        - quality
+        - watermark
+        - merge
+        - split
+        - ocr
+        - translate
+        - upscale
+        - transparency
+        - batch
+        - toolbar
+        - work
+        - school
+        - design
+    validations:
+      required: false
+
+  - type: textarea
+    id: preset
+    attributes:
+      label: Preset file
+      description: |
+        In Filee, open Settings > General > **Export**, pick the presets (and toolbar, if you want), and save
+        `filee-presets.json`. Then **drag that file into this box** (or click the box and paste it, or use the
+        attach button below the box). One file only. "Run a program" presets, personal paths and network settings
+        are not allowed.
+      placeholder: Drag filee-presets.json here
+    validations:
+      required: true
+
+  - type: textarea
+    id: images
+    attributes:
+      label: Images
+      description: |
+        **1 to 4 images** (PNG or JPEG, 640 to 2560 px on the long edge, at most 2 MB each, not animated). The first
+        is the cover. Show what the preset does: the donut slice and its settings, or a before/after of a sample
+        file. **Don't show real documents, names, faces or file paths.** Drag the images into this box.
+      placeholder: Drag 1 to 4 images here
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: Agreement
+      options:
+        - label: I dedicate this preset and its images to the public domain under CC0 1.0.
+          required: true
+        - label: I made these images myself, and they show no personal information (names, faces, documents, paths).
+          required: true

@@ -1,0 +1,107 @@
+# Publishes main after every merge: validates every preset again, fills the CI-owned meta.json fields
+# (kinds/formats/minVersion, created/updated, discussion), creates each new preset's Discussion and regenerates
+# index.json, then commits as the bot. The bot's own commit carries [gallery-publish] and doesn't start a new run.
+name: Publish
+
+on:
+  push:
+    branches: [main]
+    paths: ["presets/**", "tags.json", "tools/**", "index.json"]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[gallery-publish]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Check the bot is set up
+        env:
+          APP_ID: ${{ secrets.PRESETS_BOT_APP_ID }}
+          APP_KEY: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
+        run: |
+          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
+            echo "::error title=Bot not set up::The secrets PRESETS_BOT_APP_ID and PRESETS_BOT_PRIVATE_KEY are missing, so main can't be published. See CONTRIBUTING.md > Maintainers."
+            exit 1
+          fi
+
+      - name: Get the bot token
+        id: bot
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.PRESETS_BOT_APP_ID }}
+          private-key: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-discussions: write
+
+      - name: Check out the gallery (full history, for created/updated)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: gallery
+          fetch-depth: 0
+          token: ${{ steps.bot.outputs.token }}
+
+      - name: Check out Filee (for its validator)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: KnifeLemon/Filee
+          ref: ${{ vars.FILEE_REF || 'feat/preset-gallery' }}
+          path: filee
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: filee/global.json
+
+      - name: Install tools
+        run: python -m pip install --disable-pip-version-check -r gallery/tools/requirements.txt
+
+      - name: Build the Filee validator
+        run: dotnet build filee/src/Filee.Cli -c Release -o "$RUNNER_TEMP/filee-cli" -v quiet -nologo
+
+      - name: Validate, fill meta.json, create discussions, write index.json
+        env:
+          GH_TOKEN: ${{ steps.bot.outputs.token }}
+          DISCUSSION_CATEGORY: ${{ vars.DISCUSSION_CATEGORY }}
+        run: >-
+          python gallery/tools/publish.py --root gallery
+          --cli "dotnet $RUNNER_TEMP/filee-cli/filee-cli.dll"
+          --failed "$RUNNER_TEMP/failed.json"
+
+      - name: Commit as the bot
+        env:
+          GH_TOKEN: ${{ steps.bot.outputs.token }}
+          APP_SLUG: ${{ steps.bot.outputs.app-slug }}
+        working-directory: gallery
+        run: |
+          git add -A -- presets index.json
+          if git diff --cached --quiet; then
+            echo "Nothing to publish."
+            exit 0
+          fi
+          user_id=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" "$GITHUB_API_URL/users/${APP_SLUG}%5Bbot%5D" | python -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+          git -c "user.name=${APP_SLUG}[bot]" -c "user.email=${user_id}+${APP_SLUG}[bot]@users.noreply.github.com" \
+            commit -q -m "Publish the gallery index [gallery-publish]" \
+            -m "Fills the CI-owned meta.json fields and regenerates index.json."
+          git push -q origin HEAD:main || { git pull -q --rebase origin main && git push -q origin HEAD:main; }
+
+      - name: Fail when a preset was left out
+        run: |
+          if [ -s "$RUNNER_TEMP/failed.json" ] && [ "$(cat "$RUNNER_TEMP/failed.json")" != "{}" ]; then
+            echo "::error::Some presets fail the checks and are not in index.json:"
+            python -c 'import json,sys; [print(f"  {k}: " + "; ".join(e["message"] for e in v)) for k, v in json.load(open(sys.argv[1])).items()]' "$RUNNER_TEMP/failed.json"
+            exit 1
+          fi

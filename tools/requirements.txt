@@ -1,0 +1,2 @@
+# Image decoding and WebP encoding for every workflow. Pinned; bump on purpose.
+pillow==13.0.0

@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: A bug or idea for the Filee app
+    url: https://github.com/KnifeLemon/Filee/issues
+    about: The app itself lives in KnifeLemon/Filee. This repository only holds shared presets.

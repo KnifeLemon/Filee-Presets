@@ -1,0 +1,252 @@
+# Checks a pull request that adds or changes a preset.
+#
+# rules   Repository rules (tools/check.py) plus Filee's own validator (`filee presets check --json`, built from
+#         KnifeLemon/Filee at the FILEE_REF variable). The PR's files are checked out as data only; the tools always
+#         come from main.
+# review  AI review (tools/review.py), advisory. Runs for submission-bot pull requests, or after a maintainer
+#         (owner, member or collaborator) comments `/review` on a pull request.
+# report  Comments the result and sets `ready` / `needs-review` / `needs-changes` with the bot's token. Pull
+#         requests from forks get the result in the job summary instead (no secrets there); a maintainer's `/review`
+#         comment gives them the full check.
+name: Check preset
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths: ["presets/**"]
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+concurrency:
+  group: check-${{ github.event.pull_request.number || format('comment-{0}', github.event.comment.id) }}
+  cancel-in-progress: true
+
+jobs:
+  context:
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event.issue.pull_request &&
+       startsWith(github.event.comment.body, '/review') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      pr: ${{ steps.ctx.outputs.pr }}
+      review: ${{ steps.ctx.outputs.review }}
+      report: ${{ steps.ctx.outputs.report }}
+    steps:
+      - id: ctx
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_USER_TYPE: ${{ github.event.pull_request.user.type }}
+        run: |
+          echo "pr=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT" = "issue_comment" ]; then
+            echo "review=true" >> "$GITHUB_OUTPUT"
+            echo "report=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          same_repo=false
+          [ "$HEAD_REPO" = "$GITHUB_REPOSITORY" ] && same_repo=true
+          review=false
+          case "$HEAD_REF" in
+            submission/issue-*) [ "$same_repo" = true ] && [ "$PR_USER_TYPE" = "Bot" ] && review=true ;;
+          esac
+          echo "review=$review" >> "$GITHUB_OUTPUT"
+          echo "report=$same_repo" >> "$GITHUB_OUTPUT"
+
+  rules:
+    needs: context
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      ok: ${{ steps.check.outputs.ok }}
+    steps:
+      - name: Check out the tools (main)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: base
+          persist-credentials: false
+
+      - name: Check out the pull request's presets (data only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/pull/${{ needs.context.outputs.pr }}/head
+          path: pr
+          persist-credentials: false
+          sparse-checkout: presets
+
+      - name: Check out Filee (for its validator)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: KnifeLemon/Filee
+          ref: ${{ vars.FILEE_REF || 'feat/preset-gallery' }}
+          path: filee
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: filee/global.json
+
+      - name: Install tools
+        run: python -m pip install --disable-pip-version-check -r base/tools/requirements.txt
+
+      - name: Build the Filee validator
+        run: dotnet build filee/src/Filee.Cli -c Release -o "$RUNNER_TEMP/filee-cli" -v quiet -nologo
+
+      - name: List the changed files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ needs.context.outputs.pr }}
+        run: |
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/pulls/$PR/files" |
+            python -c 'import json,sys; print(json.dumps([f for page in json.load(sys.stdin) for f in page]))' > "$RUNNER_TEMP/changed.json"
+
+      - name: Check the rules
+        id: check
+        run: |
+          python base/tools/check.py --base base --pr pr --changed "$RUNNER_TEMP/changed.json" \
+            --out "$RUNNER_TEMP/check" --cli "dotnet $RUNNER_TEMP/filee-cli/filee-cli.dll"
+          ok=$(python -c 'import json,sys; print(str(json.load(open(sys.argv[1]))["ok"]).lower())' "$RUNNER_TEMP/check/report.json")
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        if: always() && steps.check.outcome == 'success'
+        env:
+          PR: ${{ needs.context.outputs.pr }}
+        run: python base/tools/report.py --report "$RUNNER_TEMP/check/report.json" --pr "$PR" --dry-run > /dev/null
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always() && steps.check.outcome == 'success'
+        with:
+          name: check
+          path: ${{ runner.temp }}/check
+          retention-days: 3
+
+      - name: Fail when the rules fail
+        if: steps.check.outputs.ok != 'true'
+        run: |
+          echo "::error::The preset does not pass the rules. See the summary or the pull request comment."
+          exit 1
+
+  review:
+    needs: [context, rules]
+    if: always() && needs.context.outputs.review == 'true' && needs.rules.outputs.ok == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the tools (main)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: base
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: python -m pip install --disable-pip-version-check -r base/tools/requirements-review.txt
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: check
+          path: ${{ runner.temp }}/check
+
+      - name: AI review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REVIEW_MODEL: ${{ vars.REVIEW_MODEL }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::notice title=AI review skipped::No ANTHROPIC_API_KEY secret. The pull request goes to needs-review."
+          fi
+          mkdir -p "$RUNNER_TEMP/verdict"
+          python base/tools/review.py --folder "$RUNNER_TEMP/check/preset" --out "$RUNNER_TEMP/verdict/verdict.json" \
+            --tags-root base
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verdict
+          path: ${{ runner.temp }}/verdict
+          retention-days: 3
+
+  report:
+    needs: [context, rules, review]
+    if: >-
+      always() && needs.context.outputs.report == 'true' &&
+      (needs.rules.result == 'success' || needs.rules.result == 'failure')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check the bot is set up
+        env:
+          APP_ID: ${{ secrets.PRESETS_BOT_APP_ID }}
+          APP_KEY: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
+        run: |
+          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
+            echo "::error title=Bot not set up::The secrets PRESETS_BOT_APP_ID and PRESETS_BOT_PRIVATE_KEY are missing, so the result can't be posted. See CONTRIBUTING.md > Maintainers."
+            exit 1
+          fi
+
+      - name: Get the bot token
+        id: bot
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.PRESETS_BOT_APP_ID }}
+          private-key: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
+          permission-pull-requests: write
+          permission-issues: write
+
+      - name: Check out the tools (main)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: base
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with:
+          name: check
+          path: ${{ runner.temp }}/check
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: needs.review.result == 'success'
+        continue-on-error: true
+        with:
+          name: verdict
+          path: ${{ runner.temp }}/verdict
+
+      - name: Comment and label
+        env:
+          GH_TOKEN: ${{ steps.bot.outputs.token }}
+          PR: ${{ needs.context.outputs.pr }}
+        run: |
+          python base/tools/report.py --report "$RUNNER_TEMP/check/report.json" \
+            --verdict "$RUNNER_TEMP/verdict/verdict.json" --pr "$PR"
