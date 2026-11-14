@@ -56,9 +56,17 @@ How untrusted content is handled:
   metadata survives.
 - Pull request files are checked out as data; the tools always come from main. Links (symlinks) and unexpected
   files fail the check.
-- The AI review gets the submission as data inside a fixed instruction and must answer in a fixed JSON shape, which
-  is checked field by field. It can only choose between `ready` and `needs-review`. Nobody and nothing merges
-  automatically.
+- The AI review is Claude Code (`anthropics/claude-code-action`, pinned) in a job that can't write anything: a
+  read-only `GITHUB_TOKEN`, the **Read** tool only (no shell, no editing, no web, no MCP tools), Claude Code's
+  `default` permission mode (whatever isn't allowed is denied, as nobody can approve), at most 8 turns and 10
+  minutes. Its workspace holds only `./submission` (meta.json, preset.json, JPEG copies of the images) plus
+  `tags.json` and the tools from main, and deny rules keep Read off the tools, `.git` and system folders. The
+  pull request itself is never checked out there.
+- Its instructions are fixed in `tools/review.py` and tell it that the submission files are untrusted data, never
+  instructions. It must answer with a JSON verdict (`--json-schema`), which a separate step checks field by field.
+  It never labels, comments or merges: the report job does that, and it can only choose `ready` (rules passed with
+  no warnings and a clean verdict) or `needs-review` (anything else, including a missing token, a time-out, a rate
+  limit or an unreadable answer). Nothing merges automatically.
 - Text quoted back into comments is stripped of mentions, links and markup.
 
 Run the tool tests locally with Python 3.12:
@@ -86,15 +94,25 @@ so the submission pull requests, comments, labels, Discussions and the publish c
   Client ID from the app's page) and `PRESETS_BOT_PRIVATE_KEY` (the whole `.pem` content). Then delete the local
   `.pem` file.
 
-**2. The AI review.** Add the secret `ANTHROPIC_API_KEY`. Without it the review is skipped with a notice and every
-pull request goes to `needs-review`. Variable `REVIEW_MODEL` picks the model (default `claude-haiku-5-5`).
+**2. The AI review** runs on the maintainer's Claude subscription, not API billing. On a computer with Claude Code
+signed in to that subscription, run `claude setup-token` and add the printed token as the secret
+`CLAUDE_CODE_OAUTH_TOKEN`. (A secret `ANTHROPIC_API_KEY` is used instead only when the OAuth token isn't set; leave
+it out to never bill the API.) Without either, the review is skipped with a notice and every pull request goes to
+`needs-review`; everything else works. Reviews only run for submission-bot pull requests and after a maintainer's
+`/review`, so usage stays bounded.
+
+What the review can do: read the submission's meta.json, preset.json and images, and return a verdict (spam,
+offensive, misleading, personal information in images, description matches, suggested tags, a short note). What it
+can't: run commands, edit or write files, use the web, see the pull request's other files, use a GitHub token
+that can write, or label, comment, approve or merge.
 
 **3. Variables** (Settings > Secrets and variables > Actions > Variables), all optional:
 
 | Variable | Default | Use |
 | --- | --- | --- |
 | `FILEE_REF` | `feat/preset-gallery` | branch or tag of KnifeLemon/Filee whose `filee presets check` the checks build. Set it to `main` once the validator is merged there. |
-| `REVIEW_MODEL` | `claude-haiku-5-5` | model of the AI review |
+| `REVIEW_MODEL` | `claude-haiku-5-5` | model of the AI review (Claude Code `--model`) |
+| `PRESETS_BOT_LOGIN` | `filee-presets-bot` | the bot app's login, so the review accepts pull requests it opened (`allowed_bots`) |
 | `DISCUSSION_CATEGORY` | `Presets` | Discussions category for the preset posts |
 
 **4. Discussions category.** Settings > General > Features: Discussions on. Then in the Discussions tab, edit the

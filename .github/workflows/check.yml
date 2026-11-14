@@ -3,8 +3,8 @@
 # rules   Repository rules (tools/check.py) plus Filee's own validator (`filee presets check --json`, built from
 #         KnifeLemon/Filee at the FILEE_REF variable). The PR's files are checked out as data only; the tools always
 #         come from main.
-# review  AI review (tools/review.py), advisory. Runs for submission-bot pull requests, or after a maintainer
-#         (owner, member or collaborator) comments `/review` on a pull request.
+# review  AI review (Claude Code via anthropics/claude-code-action, read-only, advisory). Runs for submission-bot
+#         pull requests, or after a maintainer (owner, member or collaborator) comments `/review` on a pull request.
 # report  Comments the result and sets `ready` / `needs-review` / `needs-changes` with the bot's token. Pull
 #         requests from forks get the result in the job summary instead (no secrets there); a maintainer's `/review`
 #         comment gives them the full check.
@@ -145,49 +145,105 @@ jobs:
           echo "::error::The preset does not pass the rules. See the summary or the pull request comment."
           exit 1
 
+  # The AI review runs Claude Code (anthropics/claude-code-action) on the Claude subscription token. It gets:
+  # - a workspace with only tags.json, tools/ (main) and ./submission (the checked preset: meta.json, preset.json
+  #   and JPEG copies of the images); the pull request itself is never checked out here,
+  # - a read-only GITHUB_TOKEN (contents: read), the Read tool only, no MCP tools, no Bash/Write/Edit/network,
+  #   --permission-mode default (anything not allowed is denied; there is nobody to approve), few turns,
+  # - a fixed prompt from tools/review.py. Its answer comes back as --json-schema structured output, and
+  #   tools/review.py checks it field by field. Labels and comments are set later by the report job, never by Claude.
   review:
     needs: [context, rules]
     if: always() && needs.context.outputs.review == 'true' && needs.rules.outputs.ok == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
-      - name: Check out the tools (main)
+      - name: Check out tags.json and the tools (main), nothing else
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
-          path: base
           persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /tags.json
+            /tools/
 
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
 
       - name: Install tools
-        run: python -m pip install --disable-pip-version-check -r base/tools/requirements-review.txt
+        run: python -m pip install --disable-pip-version-check -r tools/requirements.txt
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: check
           path: ${{ runner.temp }}/check
 
-      - name: AI review
+      - name: Prepare the submission folder and the fixed prompt
+        id: prep
         env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           REVIEW_MODEL: ${{ vars.REVIEW_MODEL }}
         run: |
-          if [ -z "$ANTHROPIC_API_KEY" ]; then
-            echo "::notice title=AI review skipped::No ANTHROPIC_API_KEY secret. The pull request goes to needs-review."
+          python tools/review.py prepare --folder "$RUNNER_TEMP/check/preset" --out submission
+          python tools/review.py prompt --folder submission --out "$RUNNER_TEMP/prompt.txt"
+          model="${REVIEW_MODEL:-claude-haiku-5-5}"
+          if ! printf '%s' "$model" | grep -Eq '^[a-z0-9][a-z0-9.-]{1,60}$'; then
+            echo "::error::REVIEW_MODEL must be a model id such as claude-haiku-5-5."
+            exit 1
           fi
+          schema=$(python tools/review.py schema)
+          {
+            echo "prompt<<EOF_PROMPT_7f3a"
+            cat "$RUNNER_TEMP/prompt.txt"
+            echo "EOF_PROMPT_7f3a"
+            # Read is the only tool; the deny rules keep it inside ./submission (and tags.json).
+            echo "args=--model $model --permission-mode default --tools Read --disallowedTools \"mcp__*,Read(./.git/**),Read(./tools/**),Read(//proc/**),Read(//etc/**)\" --max-turns 8 --json-schema '$schema'"
+          } >> "$GITHUB_OUTPUT"
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo "auth=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "auth=no" >> "$GITHUB_OUTPUT"
+            echo "::notice title=AI review skipped::No CLAUDE_CODE_OAUTH_TOKEN secret. The pull request goes to needs-review."
+          fi
+
+      - name: AI review (Claude Code, read-only)
+        id: claude
+        if: steps.prep.outputs.auth == 'yes'
+        continue-on-error: true
+        timeout-minutes: 10
+        uses: anthropics/claude-code-action@f3b070c88125d33dbae5653df5f143101d4ea9dc # v1.0.276
+        with:
+          # The subscription token; the API key is only a fallback when the token isn't set.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' && secrets.ANTHROPIC_API_KEY || '' }}
+          github_token: ${{ github.token }}
+          allowed_bots: ${{ vars.PRESETS_BOT_LOGIN || 'filee-presets-bot' }}
+          prompt: ${{ steps.prep.outputs.prompt }}
+          claude_args: ${{ steps.prep.outputs.args }}
+          display_report: "false"
+          show_full_output: "false"
+
+      - name: Check the verdict
+        env:
+          RAW: ${{ steps.claude.outputs.structured_output }}
+          CONCLUSION: ${{ steps.prep.outputs.auth == 'yes' && (steps.claude.outcome == 'success' && steps.claude.outputs.conclusion || 'failure') || 'skipped' }}
+          REVIEW_MODEL: ${{ vars.REVIEW_MODEL }}
+        run: |
           mkdir -p "$RUNNER_TEMP/verdict"
-          python base/tools/review.py --folder "$RUNNER_TEMP/check/preset" --out "$RUNNER_TEMP/verdict/verdict.json" \
-            --tags-root base
+          printf '%s' "$RAW" > "$RUNNER_TEMP/verdict/raw.json"
+          python tools/review.py verdict --raw "$RUNNER_TEMP/verdict/raw.json" --conclusion "$CONCLUSION" \
+            --out "$RUNNER_TEMP/verdict/verdict.json"
+          rm "$RUNNER_TEMP/verdict/raw.json"
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: verdict
-          path: ${{ runner.temp }}/verdict
+          path: ${{ runner.temp }}/verdict/verdict.json
           retention-days: 3
 
   report:

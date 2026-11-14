@@ -50,9 +50,10 @@ The checks work from an allow-list: a field Filee's validator doesn't know fails
    metadata (EXIF, GPS, camera and software tags, color profiles), and makes the thumbnails. Filee's own validator
    (`filee presets check`) and this repository's rules then check the preset file, the fields, the images and
    duplicates.
-2. **AI review** (advisory): an automated AI review reads the title, description, preset and images and answers a
-   fixed set of questions: spam, offensive or misleading? Does the description match the preset? Do the images
-   show personal information? It suggests tags. It can only sort the pull request into `ready` or `needs-review`.
+2. **AI review** (advisory): Claude Code, with read-only access to the submission's files and nothing else,
+   answers a fixed set of questions: spam, offensive or misleading? Does the description match the preset? Do the
+   images show personal information? It suggests tags. It can't run anything, write anything or label the pull
+   request; a separate step reads its answer and sorts the pull request into `ready` or `needs-review`.
 3. **A maintainer merges.** Nothing is published before that.
 
 ## License: CC0
