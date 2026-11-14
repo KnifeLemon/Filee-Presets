@@ -25,8 +25,8 @@ import fetch  # noqa: E402
 import images  # noqa: E402
 from common import (  # noqa: E402
     DESC_MAX, DESC_MIN, HTML_RE, LANGUAGES, LICENSE, LINK_RE, LOGIN_RE, MAX_IMAGES, MAX_LANGUAGES,
-    MAX_PRESET_BYTES, MAX_TAGS, MIN_IMAGES, SLUG_RE, TITLE_MAX, TITLE_MIN, clean_text, load_tags, slugify,
-    write_json,
+    MAX_PRESET_BYTES, MAX_TAGS, MIN_IMAGES, RESERVED_SLUGS, SLUG_RE, TITLE_MAX, TITLE_MIN, clean_text, load_tags,
+    slugify, write_json,
 )
 
 # The issue form's field labels (.github/ISSUE_TEMPLATE/submit-preset.yml). Keep both in sync.
@@ -145,9 +145,10 @@ def pick_slug(title: str, issue: int, existing: set[str]) -> str:
     base = slugify(title)
     if len(base) < 3:
         base = f"preset-{issue}"
+    taken = set(existing) | RESERVED_SLUGS
     slug = base
     n = 2
-    while slug in existing:
+    while slug in taken:
         suffix = f"-{n}"
         slug = base[: 48 - len(suffix)].rstrip("-") + suffix
         n += 1

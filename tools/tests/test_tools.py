@@ -257,6 +257,16 @@ class SmallTests(unittest.TestCase):
         self.assertNotIn("https://", text)
         self.assertIn("\\[", text)
 
+    def test_reserved_slugs(self):
+        self.assertEqual(submission.pick_slug("Index", 5, set()), "index-2")
+        self.assertEqual(submission.pick_slug("Download!", 5, {"download-2"}), "download-3")
+        self.assertEqual(submission.pick_slug("Files", 5, set()), "files-2")
+        tmp = Path(tempfile.mkdtemp())
+        for slug in common.RESERVED_SLUGS:
+            (tmp / slug).mkdir()
+            errors, _ = rules.check_folder(tmp / slug, [], published=False)
+            self.assertTrue(any(e["code"] == "slug" and "reserved" in e["message"] for e in errors), slug)
+
     def test_slugify(self):
         self.assertEqual(common.slugify("  Héllo, World!  "), "hello-world")
         self.assertEqual(submission.pick_slug("한국어", 12, set()), "preset-12")

@@ -15,6 +15,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 SLUG_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{1,46})[a-z0-9]$")
+# filee.sh serves /presets/files/..., /presets/download/<slug> and /presets/index.json next to the preset pages.
+RESERVED_SLUGS = frozenset({"files", "download", "index"})
 LOGIN_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
 FORMAT_ID_RE = re.compile(r"^[a-z0-9][a-z0-9+._-]{0,23}$")
 VERSION_RE = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}$")

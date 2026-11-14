@@ -12,8 +12,8 @@ from pathlib import Path
 import images
 from common import (
     DESC_MAX, DESC_MIN, FORMAT_ID_RE, HTML_RE, ISO_RE, KINDS, LANGUAGES, LICENSE, LINK_RE, LOGIN_RE,
-    MAX_IMAGES, MAX_LANGUAGES, MAX_META_BYTES, MAX_PRESET_BYTES, MAX_TAGS, META_KEYS, SLUG_RE, TITLE_MAX,
-    TITLE_MIN, VERSION_RE, read_json,
+    MAX_IMAGES, MAX_LANGUAGES, MAX_META_BYTES, MAX_PRESET_BYTES, MAX_TAGS, META_KEYS, RESERVED_SLUGS, SLUG_RE,
+    TITLE_MAX, TITLE_MIN, VERSION_RE, read_json,
 )
 
 IMAGE_NAME_RE = re.compile(r"^([1-4])(-thumb)?\.webp$")
@@ -153,6 +153,8 @@ def check_folder(folder: Path, tags: list[str], *, published: bool) -> tuple[lis
     errors: list[dict] = []
     if not SLUG_RE.match(slug):
         errors.append(err("slug", "The folder name must be 3-48 characters of a-z, 0-9 and -."))
+    elif slug in RESERVED_SLUGS:
+        errors.append(err("slug", f"`{slug}` is reserved for filee.sh's own pages; choose another folder name."))
     layout_errors, numbers = check_layout(folder)
     errors += layout_errors
     meta = None

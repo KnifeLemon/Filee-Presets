@@ -17,7 +17,7 @@ A preset pull request adds or changes exactly one `presets/<slug>/` folder and n
 
 | Field | Rule |
 | --- | --- |
-| `id` | the folder name: 3-48 characters, `a-z`, `0-9`, `-` |
+| `id` | the folder name: 3-48 characters, `a-z`, `0-9`, `-`; not `files`, `download` or `index` (filee.sh routes) |
 | `title` | 3-60 characters, one line, no links |
 | `description` | 10-600 characters, plain text, no links or HTML |
 | `author` | your GitHub login (CI checks it can't change later) |
