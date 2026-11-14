@@ -1,0 +1,27 @@
+{
+  "id": "photos-for-social-media",
+  "title": "Photos for social media",
+  "description": "Turns photos (JPG, PNG, HEIC, WebP and more) into JPGs ready for Instagram, Facebook, X or Threads: the long edge becomes 2048 px, quality 85, and every file stays under 4 MB. Location, camera and other metadata are removed so you don't share where a photo was taken; the colour profile stays, so colours look right. Saved next to the original as name_social.jpg.",
+  "author": "KnifeLemon",
+  "tags": [
+    "images",
+    "social",
+    "resize",
+    "compress"
+  ],
+  "languages": [
+    "en"
+  ],
+  "kinds": [
+    "convert"
+  ],
+  "formats": {
+    "from": [],
+    "to": [
+      "jpg"
+    ]
+  },
+  "minVersion": "2.5.0",
+  "discussion": null,
+  "license": "CC0-1.0"
+}

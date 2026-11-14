@@ -1,0 +1,26 @@
+{
+  "id": "smallest-pdf-for-email",
+  "title": "Smallest PDF for email",
+  "description": "Shrinks PDFs as far as they go while text stays sharp: pictures inside are brought down to screen resolution (72 dpi), document information (author, title, dates) is removed, and Ghostscript also tries when it is installed, keeping whichever file is smaller. Good for attachments and upload limits, not for printing. If a PDF can't get smaller, the original is kept.",
+  "author": "KnifeLemon",
+  "tags": [
+    "pdf",
+    "compress",
+    "work"
+  ],
+  "languages": [
+    "en"
+  ],
+  "kinds": [
+    "convert"
+  ],
+  "formats": {
+    "from": [],
+    "to": [
+      "pdf"
+    ]
+  },
+  "minVersion": "2.5.0",
+  "discussion": null,
+  "license": "CC0-1.0"
+}

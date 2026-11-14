@@ -1,0 +1,27 @@
+{
+  "id": "scans-to-one-searchable-pdf",
+  "title": "Scans to one searchable PDF",
+  "description": "Drop the photos or scans of a paper document's pages, in order, and get one PDF with A4 pages whose text you can search, select and copy: Filee recognises the English text offline with Tesseract. Change the language in the preset (for example deu, fra or kor) for other documents. Saved as name_scan.pdf after the first page. Needs Tesseract (Engines page).",
+  "author": "KnifeLemon",
+  "tags": [
+    "pdf",
+    "ocr",
+    "merge",
+    "work"
+  ],
+  "languages": [
+    "en"
+  ],
+  "kinds": [
+    "convert"
+  ],
+  "formats": {
+    "from": [],
+    "to": [
+      "pdf"
+    ]
+  },
+  "minVersion": "2.5.0",
+  "discussion": null,
+  "license": "CC0-1.0"
+}
