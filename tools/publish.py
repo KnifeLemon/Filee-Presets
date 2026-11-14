@@ -21,9 +21,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import filee_cli  # noqa: E402
+import images  # noqa: E402
 import rules  # noqa: E402
 from common import (  # noqa: E402
-    MAX_META_BYTES, META_KEYS, PUBLISH_MARKER, clean_text, env, load_tags, read_json, write_json,
+    META_KEYS, PUBLISH_MARKER, clean_text, env, load_tags, write_json,
 )
 
 STATS = {"likes": 0, "comments": 0, "downloads": 0, "hot": 0.0,
@@ -114,11 +115,32 @@ class Discussions:
         return number
 
 
+def image_entries(folder: Path, slug: str) -> dict:
+    """images/thumb for the default set, and imagesByLang/thumbByLang for language sets with the default images
+    filled in for the numbers a language set doesn't have (SPEC-images-i18n)."""
+    sets = rules.image_sets(folder)
+    base = f"presets/{slug}/images"
+    numbers = sorted(sets.get("", {}))
+    out = {"images": [f"{base}/{n}.webp" for n in numbers], "thumb": f"{base}/1-thumb.webp"}
+    langs = sorted(k for k in sets if k)
+    if langs:
+        out["imagesByLang"] = {
+            lang: [f"{base}/{lang}/{n}.webp" if n in sets[lang] else f"{base}/{n}.webp" for n in numbers]
+            for lang in langs
+        }
+        out["thumbByLang"] = {
+            lang: f"{base}/{lang}/1-thumb.webp" if 1 in sets[lang] else f"{base}/1-thumb.webp" for lang in langs
+        }
+    return out
+
+
 def publish_one(root: Path, folder: Path, tags: list[str], cli: str, discussions: Discussions | None):
     slug = folder.name
     errors, meta = rules.check_folder(folder, tags, published=False)
     if errors or meta is None:
         return None, errors or [rules.err("meta", "meta.json is missing")]
+    # PNG/JPEG sources and missing thumbnails from hand-made pull requests become clean WebP files here.
+    images.normalize(folder / "images")
     result = filee_cli.check(folder, cli)
     if not result["ok"]:
         return None, result["errors"]
@@ -139,14 +161,12 @@ def publish_one(root: Path, folder: Path, tags: list[str], cli: str, discussions
     updated = {k: updated[k] for k in META_KEYS if k in updated}
     if updated != meta:
         write_json(folder / "meta.json", updated)
-    errors = rules.check_meta(read_json(folder / "meta.json", MAX_META_BYTES), slug, tags, published=True)
+    errors, _ = rules.check_folder(folder, tags, published=True)
     if errors:
         return None, errors
-    images = sorted((folder / "images").glob("[1-4].webp"))
     entry = dict(updated)
     entry.setdefault("warnings", [])
-    entry["images"] = [p.relative_to(root).as_posix() for p in images]
-    entry["thumb"] = f"presets/{slug}/images/1-thumb.webp"
+    entry.update(image_entries(folder, slug))
     entry["preset"] = f"presets/{slug}/preset.json"
     entry["sha256"] = rules.sha256(folder / "preset.json")
     entry["stats"] = json.loads(json.dumps(STATS))

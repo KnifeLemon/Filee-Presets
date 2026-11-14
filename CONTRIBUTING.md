@@ -13,8 +13,12 @@ members may send several folders in one pull request; each is still checked on i
 - `meta.json`: the fields in the table below. Leave `created` and `updated` out and set `discussion` to `null`;
   CI sets them after the merge. `kinds`, `formats` and `minVersion` must be what Filee's validator derives from
   `preset.json` (the check says the right values if they differ).
-- `images/1.webp` ... `images/4.webp` and a `images/N-thumb.webp` (480 px long edge) for each. WebP, 640 to 2560 px
-  on the long edge, at most 2 MB, no metadata. The form does this conversion for you; by hand, strip all metadata.
+- `images/1.png` ... `images/4.png` (PNG, JPEG or WebP; 1 to 4, no gaps, 1 is the cover): 640 to 2560 px on the
+  long edge, at most 2 MB each, not animated. After the merge, CI re-encodes them to WebP without any metadata
+  (EXIF, GPS, color profiles) and makes the 480 px `N-thumb.webp` thumbnails, so you don't need to.
+- Optional language sets: `images/<code>/N.png` with the app's language codes (`ko`, `ja`, `zh-CN`, `pt-BR`,
+  `mn`, ...). Same rules per image; a set may leave numbers out (the default image shows instead) but can't add
+  numbers the default set doesn't have. The whole folder may be at most 40 MB.
 
 | Field | Rule |
 | --- | --- |

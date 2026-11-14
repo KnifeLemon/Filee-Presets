@@ -12,11 +12,12 @@ from pathlib import Path
 import images
 from common import (
     DESC_MAX, DESC_MIN, FORMAT_ID_RE, HTML_RE, ISO_RE, KINDS, LANGUAGES, LICENSE, LINK_RE, LOGIN_RE,
-    MAX_IMAGES, MAX_LANGUAGES, MAX_META_BYTES, MAX_PRESET_BYTES, MAX_TAGS, META_KEYS, RESERVED_SLUGS, SLUG_RE,
+    MAX_FOLDER_BYTES, MAX_LANGUAGES, MAX_META_BYTES, MAX_PRESET_BYTES, MAX_TAGS, META_KEYS, RESERVED_SLUGS, SLUG_RE,
     MAX_WARNINGS, SEVERITIES, TITLE_MAX, TITLE_MIN, VERSION_RE, WARNING_CODE_RE, read_json,
 )
 
-IMAGE_NAME_RE = re.compile(r"^([1-4])(-thumb)?\.webp$")
+IMAGE_NAME_RE = re.compile(r"^([1-4])(?:(-thumb)\.webp|\.(webp|png|jpg|jpeg))$")
+SOURCE_EXTS = ("png", "jpg", "jpeg")
 
 
 def err(code: str, message: str) -> dict:
@@ -27,54 +28,92 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def check_layout(folder: Path) -> tuple[list[dict], list[int]]:
-    """Only preset.json, meta.json and images/N.webp + images/N-thumb.webp (N = 1..4, no gaps). No links."""
+def image_sets(folder: Path) -> dict[str, dict[int, str]]:
+    """{"" (default set) or a language code: {number: file name of the full image}} as found on disk."""
+    sets: dict[str, dict[int, str]] = {}
+    root = folder / "images"
+    for d in [root] + sorted(p for p in root.iterdir() if p.is_dir() and not p.is_symlink()) if root.is_dir() else []:
+        key = "" if d == root else d.name
+        for f in d.iterdir():
+            m = IMAGE_NAME_RE.match(f.name)
+            if m and not m.group(2) and f.is_file() and not f.is_symlink():
+                sets.setdefault(key, {})[int(m.group(1))] = f.name
+    return sets
+
+
+def check_layout(folder: Path, *, published: bool) -> tuple[list[dict], dict[str, dict[int, str]]]:
+    """preset.json, meta.json, images/N.ext (+ N-thumb.webp) and optional images/<lang>/ sets. No links.
+
+    Published (main): WebP only, every image with its thumbnail. Before the merge PNG/JPEG sources are fine and
+    thumbnails may be missing: publish re-encodes them (tools/images.py normalize)."""
     errors: list[dict] = []
-    numbers: set[int] = set()
-    thumbs: set[int] = set()
     if folder.is_symlink() or not folder.is_dir():
-        return [err("layout", "The preset folder is missing.")], []
+        return [err("layout", "The preset folder is missing.")], {}
+    total = 0
     for entry in sorted(folder.rglob("*")):
         rel = entry.relative_to(folder).as_posix()
         if entry.is_symlink():
             errors.append(err("layout", f"`{rel}` is a link; only regular files are allowed."))
             continue
+        parts = rel.split("/")
         if entry.is_dir():
-            if rel != "images":
-                errors.append(err("layout", f"Unexpected folder `{rel}`."))
+            if rel != "images" and not (len(parts) == 2 and parts[0] == "images" and parts[1] in LANGUAGES):
+                errors.append(err("layout", f"Unexpected folder `{rel[:80]}` (language sets go in images/<language code>/)."))
             continue
+        total += entry.stat().st_size
         if rel in ("preset.json", "meta.json"):
             continue
-        m = IMAGE_NAME_RE.match(entry.name) if entry.parent.name == "images" and entry.parent.parent == folder else None
-        if not m:
+        m = IMAGE_NAME_RE.match(entry.name) if parts[0] == "images" and len(parts) in (2, 3) else None
+        if not m or (len(parts) == 3 and parts[1] not in LANGUAGES):
             errors.append(err("layout", f"Unexpected file `{rel[:80]}`."))
-            continue
-        (thumbs if m.group(2) else numbers).add(int(m.group(1)))
+        elif published and m.group(3) in SOURCE_EXTS:
+            errors.append(err("images", f"`{rel[:80]}` must be WebP on main."))
+    if total > MAX_FOLDER_BYTES:
+        errors.append(err("size", f"The folder is {total / 1048576:.1f} MB; at most {MAX_FOLDER_BYTES // 1048576} MB."))
     for name in ("preset.json", "meta.json"):
         if not (folder / name).is_file():
             errors.append(err("layout", f"`{name}` is missing."))
-    count = len(numbers)
-    if count < 1:
+
+    sets = image_sets(folder)
+    default = sets.get("", {})
+    for key in sorted(sets, key=lambda k: (k != "", k)):
+        prefix = "images/" + (f"{key}/" if key else "")
+        d = folder / prefix
+        numbers = set(sets[key])
+        for n in numbers:
+            sources = [e for e in ("webp",) + SOURCE_EXTS if (d / f"{n}.{e}").is_file()]
+            if len(sources) > 1:
+                errors.append(err("images", f"`{prefix}{n}` exists as more than one file ({', '.join(sources)})."))
+        if key == "" and numbers != set(range(1, len(numbers) + 1)):
+            errors.append(err("images", "Images must be numbered 1, 2, 3, 4 without gaps."))
+        if key and not numbers <= set(default):
+            errors.append(err("images", f"`{prefix}` has numbers the default set doesn't have; a language set replaces default images, it can't add new ones."))
+        for n in sorted(numbers):
+            if published and not (d / f"{n}-thumb.webp").is_file():
+                errors.append(err("images", f"`{prefix}{n}-thumb.webp` is missing."))
+        for t in sorted(d.glob("[1-4]-thumb.webp")):
+            if int(t.name[0]) not in numbers:
+                errors.append(err("images", f"`{prefix}{t.name}` has no matching image."))
+    if not default:
         errors.append(err("images", "At least one image is required (images/1.webp is the cover)."))
-    elif numbers != set(range(1, count + 1)):
-        errors.append(err("images", "Images must be numbered 1, 2, 3, 4 without gaps."))
-    if count > MAX_IMAGES:
-        errors.append(err("images", f"At most {MAX_IMAGES} images are allowed."))
-    for n in sorted(numbers):
-        if n not in thumbs:
-            errors.append(err("images", f"`images/{n}-thumb.webp` is missing."))
-    for n in sorted(thumbs - numbers):
-        errors.append(err("images", f"`images/{n}-thumb.webp` has no matching image."))
-    return errors, sorted(numbers)
+    return errors, sets
 
 
-def check_images(folder: Path, numbers: list[int]) -> list[dict]:
+def check_images(folder: Path, sets: dict[str, dict[int, str]], *, published: bool) -> list[dict]:
     errors = []
-    for n in numbers:
-        for name, thumb in ((f"{n}.webp", False), (f"{n}-thumb.webp", True)):
-            problem = images.check_published(folder / "images" / name, thumb=thumb)
+    for key, numbers in sets.items():
+        prefix = "images/" + (f"{key}/" if key else "")
+        for n, name in sorted(numbers.items()):
+            path = folder / prefix / name
+            # Before the merge any PNG/JPEG/WebP that decodes is fine (publish re-encodes it without metadata).
+            problem = images.check_published(path, thumb=False) if published else images.check_source(path)
             if problem:
-                errors.append(err("images", f"`images/{name}` {problem}."))
+                errors.append(err("images", f"`{prefix}{name}` {problem}."))
+            thumb = folder / prefix / f"{n}-thumb.webp"
+            if thumb.is_file():
+                problem = images.check_published(thumb, thumb=True)
+                if problem:
+                    errors.append(err("images", f"`{prefix}{thumb.name}` {problem}."))
     return errors
 
 
@@ -163,7 +202,7 @@ def check_folder(folder: Path, tags: list[str], *, published: bool) -> tuple[lis
         errors.append(err("slug", "The folder name must be 3-48 characters of a-z, 0-9 and -."))
     elif slug in RESERVED_SLUGS:
         errors.append(err("slug", f"`{slug}` is reserved for filee.sh's own pages; choose another folder name."))
-    layout_errors, numbers = check_layout(folder)
+    layout_errors, sets = check_layout(folder, published=published)
     errors += layout_errors
     meta = None
     if (folder / "meta.json").is_file() and not (folder / "meta.json").is_symlink():
@@ -179,5 +218,5 @@ def check_folder(folder: Path, tags: list[str], *, published: bool) -> tuple[lis
             read_json(preset, MAX_PRESET_BYTES)
         except Exception as e:
             errors.append(err("preset", f"preset.json does not parse: {str(e)[:120]}"))
-    errors += check_images(folder, numbers)
+    errors += check_images(folder, sets, published=published)
     return errors, meta if isinstance(meta, dict) else None

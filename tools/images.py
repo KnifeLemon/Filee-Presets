@@ -107,6 +107,53 @@ def check_published(path: Path, *, thumb: bool) -> str | None:
     return None
 
 
+def check_source(path: Path) -> str | None:
+    """Checks an image in a pull request before CI re-encodes it (PNG, JPEG or WebP; metadata may still be there).
+    Returns an error message or None."""
+    if path.is_symlink() or not path.is_file():
+        return "is not a regular file"
+    try:
+        reencode(path.read_bytes())
+    except ImageError as e:
+        return str(e)
+    return None
+
+
+def _has_metadata(path: Path) -> bool:
+    with Image.open(path, formats=["WEBP"]) as im:
+        return bool(im.info.get("exif") or im.info.get("icc_profile") or im.info.get("xmp"))
+
+
+def normalize(images_dir: Path) -> list[str]:
+    """Turns every image set under images/ (the default set and images/<lang>/) into clean WebP files with
+    thumbnails: PNG/JPEG sources and WebP files that still carry metadata are re-encoded (and the source removed),
+    a missing thumbnail is made from the WebP. Clean files are left alone, so running it again changes nothing.
+    Returns the paths it wrote or removed, relative to images_dir."""
+    changed: list[str] = []
+    dirs = [images_dir] + sorted(p for p in images_dir.iterdir() if p.is_dir() and not p.is_symlink())
+    for d in dirs:
+        for n in range(1, 5):
+            webp, thumb = d / f"{n}.webp", d / f"{n}-thumb.webp"
+            sources = [d / f"{n}.{ext}" for ext in ("png", "jpg", "jpeg") if (d / f"{n}.{ext}").is_file()]
+            if sources or (webp.is_file() and _has_metadata(webp)):
+                src = sources[0] if sources else webp
+                full, small = reencode(src.read_bytes())
+                webp.write_bytes(full)
+                thumb.write_bytes(small)
+                for s in sources:
+                    s.unlink()
+                changed += [p.relative_to(images_dir).as_posix() for p in [webp, thumb, *sources]]
+            elif webp.is_file() and not thumb.is_file():
+                with Image.open(webp, formats=["WEBP"]) as im:
+                    small = im.convert("RGBA" if "A" in im.getbands() else "RGB")
+                small.thumbnail((THUMB_EDGE, THUMB_EDGE), Image.Resampling.LANCZOS)
+                out = io.BytesIO()
+                small.save(out, "WEBP", quality=THUMB_QUALITY, method=6, exif=b"", icc_profile=None, xmp=b"")
+                thumb.write_bytes(out.getvalue())
+                changed.append(thumb.relative_to(images_dir).as_posix())
+    return changed
+
+
 def review_copy(path: Path, edge: int = 1280) -> bytes:
     """A smaller JPEG of a published image for the AI review."""
     with Image.open(path, formats=["WEBP"]) as im:

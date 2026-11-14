@@ -277,6 +277,50 @@ class CheckAndPublishTests(Stubbed):
         rep, _ = check.run(self.repo, pr, changed, cli, "MEMBER")
         self.assertTrue(any(e["message"].startswith(f"`{b.name}`") for e in rep["errors"]))
 
+    def test_language_image_sets(self):
+        built = self.build()  # default set: 1.webp and 2.webp
+        ko = built / "images" / "ko"
+        ko.mkdir()
+        (ko / "1.png").write_bytes(png(size=(1280, 720), mode="RGB"))
+        ja = built / "images" / "ja"
+        ja.mkdir()
+        (ja / "2.jpg").write_bytes(jpeg_with_gps())
+        tags = common.load_tags(self.repo)
+        self.assertEqual(rules.check_folder(built, tags, published=False)[0], [])  # sources are fine in a PR
+        self.assertTrue(rules.check_folder(built, tags, published=True)[0])      # but not on main
+        import shutil
+        shutil.copytree(built, self.repo / "presets" / built.name)
+        folder = self.repo / "presets" / built.name
+        entry, errors = publish.publish_one(self.repo, folder, tags, fake_cli(self.tmp, GOOD_CLI), None)
+        self.assertEqual(errors, [])
+        self.assertFalse((folder / "images" / "ko" / "1.png").exists())
+        with Image.open(folder / "images" / "ja" / "2.webp") as im:
+            self.assertFalse(im.getexif())
+        base = f"presets/{built.name}/images"
+        self.assertEqual(entry["images"], [f"{base}/1.webp", f"{base}/2.webp"])
+        self.assertEqual(entry["imagesByLang"], {"ja": [f"{base}/1.webp", f"{base}/ja/2.webp"],
+                                                 "ko": [f"{base}/ko/1.webp", f"{base}/2.webp"]})
+        self.assertEqual(entry["thumbByLang"], {"ja": f"{base}/1-thumb.webp", "ko": f"{base}/ko/1-thumb.webp"})
+        self.assertEqual(images.normalize(folder / "images"), [])  # a second publish changes nothing
+        # bad sets: unknown language, numbers the default set lacks, nested folders
+        (folder / "images" / "xx").mkdir()
+        (folder / "images" / "ko" / "3.png").write_bytes(png())
+        (folder / "images" / "ko" / "deep").mkdir()
+        messages = " ".join(e["message"] for e in rules.check_folder(folder, tags, published=False)[0])
+        self.assertIn("images/xx", messages)
+        self.assertIn("can't add new ones", messages)
+        self.assertIn("images/ko/deep", messages)
+
+    def test_folder_size_cap(self):
+        built = self.build()
+        original = common.MAX_FOLDER_BYTES
+        try:
+            rules.MAX_FOLDER_BYTES = 1000
+            errors = rules.check_folder(built, common.load_tags(self.repo), published=False)[0]
+            self.assertTrue(any(e["code"] == "size" for e in errors))
+        finally:
+            rules.MAX_FOLDER_BYTES = original
+
     def test_publish_writes_index(self):
         built = self.build()
         import shutil

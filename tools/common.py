@@ -30,6 +30,7 @@ MAX_TAGS = 6
 MAX_LANGUAGES = 6
 MIN_IMAGES, MAX_IMAGES = 1, 4
 MAX_IMAGE_BYTES = 2 * 1024 * 1024
+MAX_FOLDER_BYTES = 40 * 1024 * 1024  # everything in presets/<slug>/, language image sets included
 MIN_LONG_EDGE, MAX_LONG_EDGE = 640, 2560
 THUMB_EDGE = 480
 MAX_PRESET_BYTES = 256 * 1024
@@ -43,7 +44,7 @@ MAX_WARNINGS = 20
 
 # Languages a title/description can be written in: the Filee app's UI languages.
 LANGUAGES = [
-    "ar", "bn-BD", "de", "en", "es", "fa", "fr", "hi", "id", "it", "ja", "ko", "ne", "pl", "pt-BR", "pt-PT",
+    "ar", "bn-BD", "de", "en", "es", "fa", "fr", "hi", "id", "it", "ja", "ko", "mn", "ne", "pl", "pt-BR", "pt-PT",
     "ru", "th", "tr", "vi", "zh-CN", "zh-TW",
 ]
 
