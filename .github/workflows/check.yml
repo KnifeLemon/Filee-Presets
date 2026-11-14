@@ -1,16 +1,30 @@
 # Checks a pull request that adds or changes a preset.
 #
+# Started three ways:
+# - submission.yml calls it (workflow_call) right after it opens or updates a submission pull request. That pull
+#   request comes from GITHUB_TOKEN, and GitHub doesn't start other workflows for those, so it is called directly.
+# - pull_request: pull requests by people (rules only; forks get the result in the job summary).
+# - a `/review` comment by a maintainer (owner, member or collaborator) on any pull request: the full check.
+#
 # rules   Repository rules (tools/check.py) plus Filee's own validator (`filee presets check --json`, built from
 #         KnifeLemon/Filee at the FILEE_REF variable). The PR's files are checked out as data only; the tools always
 #         come from main.
-# review  AI review (Claude Code via anthropics/claude-code-action, read-only, advisory). Runs for submission-bot
-#         pull requests, or after a maintainer (owner, member or collaborator) comments `/review` on a pull request.
-# report  Comments the result and sets `ready` / `needs-review` / `needs-changes` with the bot's token. Pull
-#         requests from forks get the result in the job summary instead (no secrets there); a maintainer's `/review`
-#         comment gives them the full check.
+# review  AI review (Claude Code via anthropics/claude-code-action, read-only, advisory), for submission pull
+#         requests and after `/review`.
+# report  Comments the result, sets `ready` / `needs-review` / `needs-changes` and a `rules` commit status on the head.
 name: Check preset
 
 on:
+  workflow_call:
+    inputs:
+      pr:
+        description: Pull request number
+        type: number
+        required: true
+      head_sha:
+        description: The pull request head commit to check
+        type: string
+        required: true
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths: ["presets/**"]
@@ -20,14 +34,16 @@ on:
 permissions: {}
 
 concurrency:
-  group: check-${{ github.event.pull_request.number || format('comment-{0}', github.event.comment.id) }}
+  group: check-${{ inputs.pr || github.event.pull_request.number || format('comment-{0}', github.event.comment.id) }}
   cancel-in-progress: true
 
 jobs:
   context:
     if: >-
+      inputs.pr ||
       github.event_name == 'pull_request' ||
-      (github.event.issue.pull_request &&
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
        startsWith(github.event.comment.body, '/review') &&
        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: ubuntu-24.04
@@ -36,6 +52,8 @@ jobs:
       pull-requests: read
     outputs:
       pr: ${{ steps.ctx.outputs.pr }}
+      sha: ${{ steps.ctx.outputs.sha }}
+      called: ${{ steps.ctx.outputs.called }}
       review: ${{ steps.ctx.outputs.review }}
       report: ${{ steps.ctx.outputs.report }}
     steps:
@@ -43,25 +61,37 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           EVENT: ${{ github.event_name }}
+          CALL_PR: ${{ inputs.pr }}
+          CALL_SHA: ${{ inputs.head_sha }}
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
           HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           PR_USER_TYPE: ${{ github.event.pull_request.user.type }}
         run: |
-          echo "pr=$PR_NUMBER" >> "$GITHUB_OUTPUT"
-          if [ "$EVENT" = "issue_comment" ]; then
-            echo "review=true" >> "$GITHUB_OUTPUT"
-            echo "report=true" >> "$GITHUB_OUTPUT"
-            exit 0
+          called=false
+          if [ -n "$CALL_PR" ]; then
+            pr="$CALL_PR"; sha="$CALL_SHA"; called=true; review=true; report=true
+          elif [ "$EVENT" = "issue_comment" ]; then
+            pr="$PR_NUMBER"; review=true; report=true
+            sha=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq .head.sha)
+          else
+            pr="$PR_NUMBER"; sha="$PR_SHA"
+            same_repo=false
+            [ "$HEAD_REPO" = "$GITHUB_REPOSITORY" ] && same_repo=true
+            review=false
+            case "$HEAD_REF" in
+              submission/issue-*) [ "$same_repo" = true ] && [ "$PR_USER_TYPE" = "Bot" ] && review=true ;;
+            esac
+            report=$same_repo
           fi
-          same_repo=false
-          [ "$HEAD_REPO" = "$GITHUB_REPOSITORY" ] && same_repo=true
-          review=false
-          case "$HEAD_REF" in
-            submission/issue-*) [ "$same_repo" = true ] && [ "$PR_USER_TYPE" = "Bot" ] && review=true ;;
-          esac
-          echo "review=$review" >> "$GITHUB_OUTPUT"
-          echo "report=$same_repo" >> "$GITHUB_OUTPUT"
+          if ! printf '%s' "$pr" | grep -Eq '^[0-9]{1,9}$' || ! printf '%s' "$sha" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::No valid pull request number or head commit."
+            exit 1
+          fi
+          {
+            echo "pr=$pr"; echo "sha=$sha"; echo "called=$called"; echo "review=$review"; echo "report=$report"
+          } >> "$GITHUB_OUTPUT"
 
   rules:
     needs: context
@@ -83,7 +113,7 @@ jobs:
       - name: Check out the pull request's presets (data only)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/pull/${{ needs.context.outputs.pr }}/head
+          ref: ${{ needs.context.outputs.sha }}
           path: pr
           persist-credentials: false
           sparse-checkout: presets
@@ -222,7 +252,11 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' && secrets.ANTHROPIC_API_KEY || '' }}
           github_token: ${{ github.token }}
-          allowed_bots: ${{ vars.PRESETS_BOT_LOGIN || 'filee-presets-bot' }}
+          # Called from submission.yml, the run belongs to the submitter's `issues` event, and the action only
+          # starts for people with write access unless they are listed here. This job can't write anything (read-only
+          # token, Read tool only), which is the case the action documents for this input. /review and people's
+          # pull requests keep the normal write-access check. No allowed_bots: no path here has a bot as the actor.
+          allowed_non_write_users: ${{ needs.context.outputs.called == 'true' && '*' || '' }}
           prompt: ${{ steps.prep.outputs.prompt }}
           claude_args: ${{ steps.prep.outputs.args }}
           display_report: "false"
@@ -255,26 +289,10 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
+      pull-requests: write
+      issues: write
+      statuses: write
     steps:
-      - name: Check the bot is set up
-        env:
-          APP_ID: ${{ secrets.PRESETS_BOT_APP_ID }}
-          APP_KEY: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
-        run: |
-          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
-            echo "::error title=Bot not set up::The secrets PRESETS_BOT_APP_ID and PRESETS_BOT_PRIVATE_KEY are missing, so the result can't be posted. See CONTRIBUTING.md > Maintainers."
-            exit 1
-          fi
-
-      - name: Get the bot token
-        id: bot
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ secrets.PRESETS_BOT_APP_ID }}
-          private-key: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
-          permission-pull-requests: write
-          permission-issues: write
-
       - name: Check out the tools (main)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -299,10 +317,11 @@ jobs:
           name: verdict
           path: ${{ runner.temp }}/verdict
 
-      - name: Comment and label
+      - name: Comment, label and set the rules status
         env:
-          GH_TOKEN: ${{ steps.bot.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
           PR: ${{ needs.context.outputs.pr }}
+          SHA: ${{ needs.context.outputs.sha }}
         run: |
           python base/tools/report.py --report "$RUNNER_TEMP/check/report.json" \
-            --verdict "$RUNNER_TEMP/verdict/verdict.json" --pr "$PR"
+            --verdict "$RUNNER_TEMP/verdict/verdict.json" --pr "$PR" --sha "$SHA"

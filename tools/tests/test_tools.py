@@ -319,6 +319,10 @@ class SmallTests(unittest.TestCase):
         self.assertEqual(report.decide({"ok": True, "warnings": []}, None), "needs-review")
         self.assertEqual(report.decide({"ok": False}, clean), "needs-changes")
         self.assertEqual(report.decide({"ok": False, "incomplete": True}, None), "needs-review")
+        self.assertEqual(report.status_of({"ok": True})[0], "success")
+        self.assertEqual(report.status_of({"ok": False, "errors": [{}]})[0], "failure")
+        self.assertEqual(report.status_of({"ok": False, "incomplete": True})[0], "error")
+        self.assertTrue(all(len(report.status_of(r)[1]) <= 140 for r in ({"ok": True}, {"ok": False, "errors": []})))
 
     def test_form_matches_tags_and_languages(self):
         form = (ROOT / ".github" / "ISSUE_TEMPLATE" / "submit-preset.yml").read_text(encoding="utf-8")

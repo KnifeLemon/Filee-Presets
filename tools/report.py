@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -47,6 +48,15 @@ def decide(report: dict, verdict: dict | None) -> str:
     if verdict and verdict.get("status") == "done" and (verdict.get("verdict") or {}).get("clean") is True:
         return "ready"
     return "needs-review"
+
+
+def status_of(report: dict) -> tuple[str, str]:
+    """The `rules` commit status: the rules result only (the AI review is shown by the label)."""
+    if report.get("incomplete"):
+        return "error", "The check could not finish; a maintainer will run it again."
+    if not report.get("ok"):
+        return "failure", f"{len(report.get('errors') or [])} problem(s) to fix; see the comment."
+    return "success", "Rules and Filee's validator passed."
 
 
 def render(report: dict, verdict: dict | None, label: str) -> str:
@@ -110,6 +120,7 @@ def main() -> int:
     ap.add_argument("--report", required=True, type=Path)
     ap.add_argument("--verdict", type=Path)
     ap.add_argument("--pr", required=True, type=int)
+    ap.add_argument("--sha", default="", help="pull request head; gets a `rules` commit status")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     report = load(args.report) or {
@@ -132,6 +143,11 @@ def main() -> int:
     repo = os.environ["GITHUB_REPOSITORY"]
     gh.upsert_comment(repo, args.pr, CHECK_MARKER, body)
     gh.set_labels(repo, args.pr, [label], [name for name in LABELS if name != label])
+    if re.fullmatch(r"[0-9a-f]{40}", args.sha):
+        state, text = status_of(report)
+        run_url = f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"
+        gh.request("POST", f"repos/{repo}/statuses/{args.sha}",
+                   {"state": state, "context": "rules", "description": text, "target_url": run_url})
     print(f"label: {label}")
     return 0
 

@@ -2,7 +2,7 @@
 
 Usage: python tools/open_pr.py --result <dir from submission.py> --repo <main checkout> --issue N
 
-Runs with the GitHub App token (GH_TOKEN). Before anything is committed, the built folder is checked again against
+Runs with the workflow's GITHUB_TOKEN (GH_TOKEN). Before anything is committed, the built folder is checked again against
 the repository rules, so only preset.json, meta.json and re-encoded WebP images can reach the branch.
 """
 
@@ -23,6 +23,8 @@ import rules  # noqa: E402
 from common import LOGIN_RE, SLUG_RE, SUBMISSION_MARKER, clean_text, defang, load_tags  # noqa: E402
 
 REPO = os.environ.get("GITHUB_REPOSITORY", "")
+BOT_NAME = "github-actions[bot]"
+BOT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com"
 FORM_HINT = "Edit the issue (the **...** menu > **Edit**) to fix it; the check runs again on every edit."
 
 
@@ -42,6 +44,14 @@ def report_failure(issue: int, errors) -> None:
     )
     gh.upsert_comment(REPO, issue, SUBMISSION_MARKER, body)
     gh.set_labels(REPO, issue, ["needs-changes"], [])
+
+
+def write_outputs(**values) -> None:
+    path = os.environ.get("GITHUB_OUTPUT")
+    if path:
+        with open(path, "a", encoding="utf-8") as f:
+            for key, value in values.items():
+                f.write(f"{key}={value}\n")
 
 
 def main() -> int:
@@ -81,16 +91,19 @@ def main() -> int:
     git(repo, "add", "--", f"presets/{slug}")
     # Titles show as plain text in commits and PR titles; only mentions need neutralising there.
     title = clean_text(result.get("title") or slug, single_line=True)[:60].replace("@", "@\u200b")
-    git(repo, "-c", f"user.name={os.environ['BOT_NAME']}", "-c", f"user.email={os.environ['BOT_EMAIL']}",
+    git(repo, "-c", f"user.name={BOT_NAME}", "-c", f"user.email={BOT_EMAIL}",
         "commit", "-q", "-m", f"Add preset: {title} (#{args.issue})", "-m", f"Submitted by {author} in #{args.issue}.")
 
     # Push only when the content changed, so an issue edit that changes nothing doesn't re-run the checks.
-    remote_tree = ""
+    remote_tree = remote_head = ""
     if git(repo, "fetch", "-q", "origin", branch, check=False).returncode == 0:
         remote_tree = git(repo, "rev-parse", "FETCH_HEAD^{tree}", check=False).stdout.strip()
+        remote_head = git(repo, "rev-parse", "FETCH_HEAD", check=False).stdout.strip()
     local_tree = git(repo, "rev-parse", "HEAD^{tree}").stdout.strip()
-    if remote_tree != local_tree:
+    pushed = remote_tree != local_tree
+    if pushed:
         git(repo, "push", "-q", "--force", "origin", f"HEAD:refs/heads/{branch}")
+    head_sha = git(repo, "rev-parse", "HEAD").stdout.strip() if pushed else remote_head
 
     owner = REPO.split("/")[0]
     pr_title = f"Add preset: {title}"
@@ -121,6 +134,8 @@ def main() -> int:
     ))
     gh.set_labels(REPO, args.issue, [], ["needs-changes"])
     print(f"PR #{pr['number']} {verb}")
+    # GITHUB_TOKEN's pull requests don't start other workflows, so submission.yml calls check.yml itself with these.
+    write_outputs(pr=pr["number"], sha=head_sha, check="true" if (pushed or verb == "opened") else "false")
     return 0
 
 

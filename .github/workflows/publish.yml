@@ -1,6 +1,7 @@
 # Publishes main after every merge: validates every preset again, fills the CI-owned meta.json fields
 # (kinds/formats/minVersion, created/updated, discussion), creates each new preset's Discussion and regenerates
-# index.json, then commits as the bot. The bot's own commit carries [gallery-publish] and doesn't start a new run.
+# index.json, then commits as github-actions[bot] with GITHUB_TOKEN. Pushes made with GITHUB_TOKEN don't start
+# workflows; the commit also carries [gallery-publish], which this workflow skips, as a second guard.
 name: Publish
 
 on:
@@ -21,34 +22,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
-      contents: read
+      contents: write
+      discussions: write
     steps:
-      - name: Check the bot is set up
-        env:
-          APP_ID: ${{ secrets.PRESETS_BOT_APP_ID }}
-          APP_KEY: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
-        run: |
-          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
-            echo "::error title=Bot not set up::The secrets PRESETS_BOT_APP_ID and PRESETS_BOT_PRIVATE_KEY are missing, so main can't be published. See CONTRIBUTING.md > Maintainers."
-            exit 1
-          fi
-
-      - name: Get the bot token
-        id: bot
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ secrets.PRESETS_BOT_APP_ID }}
-          private-key: ${{ secrets.PRESETS_BOT_PRIVATE_KEY }}
-          permission-contents: write
-          permission-discussions: write
-
       - name: Check out the gallery (full history, for created/updated)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           path: gallery
           fetch-depth: 0
-          token: ${{ steps.bot.outputs.token }}
 
       - name: Check out Filee (for its validator)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -74,17 +56,14 @@ jobs:
 
       - name: Validate, fill meta.json, create discussions, write index.json
         env:
-          GH_TOKEN: ${{ steps.bot.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
           DISCUSSION_CATEGORY: ${{ vars.DISCUSSION_CATEGORY }}
         run: >-
           python gallery/tools/publish.py --root gallery
           --cli "dotnet $RUNNER_TEMP/filee-cli/filee-cli.dll"
           --failed "$RUNNER_TEMP/failed.json"
 
-      - name: Commit as the bot
-        env:
-          GH_TOKEN: ${{ steps.bot.outputs.token }}
-          APP_SLUG: ${{ steps.bot.outputs.app-slug }}
+      - name: Commit as github-actions[bot]
         working-directory: gallery
         run: |
           git add -A -- presets index.json
@@ -92,8 +71,7 @@ jobs:
             echo "Nothing to publish."
             exit 0
           fi
-          user_id=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" "$GITHUB_API_URL/users/${APP_SLUG}%5Bbot%5D" | python -c 'import json,sys; print(json.load(sys.stdin)["id"])')
-          git -c "user.name=${APP_SLUG}[bot]" -c "user.email=${user_id}+${APP_SLUG}[bot]@users.noreply.github.com" \
+          git -c "user.name=github-actions[bot]" -c "user.email=41898282+github-actions[bot]@users.noreply.github.com" \
             commit -q -m "Publish the gallery index [gallery-publish]" \
             -m "Fills the CI-owned meta.json fields and regenerates index.json."
           git push -q origin HEAD:main || { git pull -q --rebase origin main && git push -q origin HEAD:main; }

@@ -38,7 +38,7 @@ Tags list in `.github/ISSUE_TEMPLATE/submit-preset.yml`) first.
 | Workflow | When | What |
 | --- | --- | --- |
 | `submission.yml` | a `submission` issue is opened or edited | builds the folder from the issue's attachments and opens or updates the pull request |
-| `check.yml` | a pull request touches `presets/`, or a maintainer comments `/review` | rules + Filee's validator; AI review; comment and label |
+| `check.yml` | called by `submission.yml` for its pull requests; a pull request by a person touches `presets/`; a maintainer comments `/review` | rules + Filee's validator; AI review; comment, label and a `rules` commit status |
 | `publish.yml` | a push to main | validates everything again, fills the CI fields, creates Discussions, regenerates `index.json` |
 | `tools.yml` | changes to `tools/` or `.github/` | unit tests of the tools |
 
@@ -78,56 +78,44 @@ python -m unittest discover -s tools/tests
 
 ## Maintainers
 
-One-time setup of this repository.
+One-time setup of this repository. Everything runs on the workflows' own `GITHUB_TOKEN`; there is no bot account
+or app. Its pull requests, comments, labels, Discussions and publish commits show as `github-actions[bot]`.
 
-**1. The bot (a GitHub App).** Pull requests opened with the built-in `GITHUB_TOKEN` don't start other workflows,
-so the submission pull requests, comments, labels, Discussions and the publish commit come from a GitHub App.
+**1. Actions settings** (Settings > Actions > General):
 
-- Create it under **Settings > Developer settings > GitHub Apps > New GitHub App**: name `filee-presets-bot`,
-  homepage `https://github.com/KnifeLemon/Filee-Presets`, **Webhook: off**.
-- Repository permissions: **Contents: read & write**, **Pull requests: read & write**, **Issues: read & write**,
-  **Discussions: read & write**, Metadata: read (automatic). Nothing else, no account permissions, no events.
-- "Where can this app be installed?": **Only on this account**. Install it with **Only select repositories >
-  Filee-Presets**.
-- Generate a private key (a `.pem` file).
-- In Filee-Presets **Settings > Secrets and variables > Actions > Secrets**, add `PRESETS_BOT_APP_ID` (the App ID or
-  Client ID from the app's page) and `PRESETS_BOT_PRIVATE_KEY` (the whole `.pem` content). Then delete the local
-  `.pem` file.
+- Workflow permissions: **Read repository contents** (each job asks for the little more it needs), and tick
+  **Allow GitHub Actions to create and approve pull requests**: `submission.yml` opens the pull requests with
+  `GITHUB_TOKEN`. (No workflow here approves anything.)
+- Fork pull request workflows: require approval for first-time contributors.
 
 **2. The AI review** runs on the maintainer's Claude subscription, not API billing. On a computer with Claude Code
-signed in to that subscription, run `claude setup-token` and add the printed token as the secret
-`CLAUDE_CODE_OAUTH_TOKEN`. (A secret `ANTHROPIC_API_KEY` is used instead only when the OAuth token isn't set; leave
-it out to never bill the API.) Without either, the review is skipped with a notice and every pull request goes to
-`needs-review`; everything else works. Reviews only run for submission-bot pull requests and after a maintainer's
-`/review`, so usage stays bounded.
+signed in to that subscription, run `claude setup-token` and add the printed token as the repository secret
+`CLAUDE_CODE_OAUTH_TOKEN` (Settings > Secrets and variables > Actions). A secret `ANTHROPIC_API_KEY` is used instead
+only when the OAuth token isn't set; leave it out to never bill the API. Without either, the review is skipped with a
+notice and every pull request goes to `needs-review`; everything else works. Reviews only run for form submissions
+and after a maintainer's `/review`, so usage stays bounded. The token expires; run `claude setup-token` again and
+replace the secret when reviews start failing with an authentication error.
 
 What the review can do: read the submission's meta.json, preset.json and images, and return a verdict (spam,
 offensive, misleading, personal information in images, description matches, suggested tags, a short note). What it
 can't: run commands, edit or write files, use the web, see the pull request's other files, use a GitHub token
 that can write, or label, comment, approve or merge.
 
-**3. Variables** (Settings > Secrets and variables > Actions > Variables), all optional:
+**3. Discussions category.** Discussions are on. In the Discussions tab, edit the categories and add **Presets**
+(format: Announcement, so only maintainers and the workflows start posts; everyone can comment and react). The API
+can't create categories. Until it exists, presets are published without a discussion (a warning in the log).
+
+**4. Labels**: `submission`, `ready`, `needs-review`, `needs-changes` (already created).
+
+**5. Variables** (Settings > Secrets and variables > Actions > Variables), all optional:
 
 | Variable | Default | Use |
 | --- | --- | --- |
 | `FILEE_REF` | `feat/preset-gallery` | branch or tag of KnifeLemon/Filee whose `filee presets check` the checks build. Set it to `main` once the validator is merged there. |
 | `REVIEW_MODEL` | `claude-haiku-5-5` | model of the AI review (Claude Code `--model`) |
-| `PRESETS_BOT_LOGIN` | `filee-presets-bot` | the bot app's login, so the review accepts pull requests it opened (`allowed_bots`) |
 | `DISCUSSION_CATEGORY` | `Presets` | Discussions category for the preset posts |
 
-**4. Discussions category.** Settings > General > Features: Discussions on. Then in the Discussions tab, edit the
-categories and add **Presets** (format: Announcement, so only maintainers and the bot start posts; everyone can
-comment and react). The API can't create categories.
-
-**5. Labels**: `submission`, `ready`, `needs-review`, `needs-changes`.
-
-**6. Actions settings** (Settings > Actions > General): Workflow permissions **Read repository contents**; leave
-"Allow GitHub Actions to create and approve pull requests" off (the bot does that, not `GITHUB_TOKEN`). Fork pull
-request workflows: require approval for first-time contributors.
-
-**7. Protect main** (Settings > Rules > Rulesets > New branch ruleset, target `main`):
-
-- Require a pull request before merging (1 approval is optional for a single maintainer), require status checks:
-  **rules** (from "Check preset"), block force pushes, restrict deletions.
-- **Bypass list: add the `filee-presets-bot` app** (always allow), so `publish.yml` can push its
-  `[gallery-publish]` commit straight to main. No other bypass is needed.
+**6. Protecting main** is optional while there is one maintainer. If you add a ruleset later, `publish.yml` pushes
+its `[gallery-publish]` commit straight to main with `GITHUB_TOKEN`, so let GitHub Actions bypass it (or require
+pull requests only for other people), and note that pull requests which don't touch `presets/` never get the
+`rules` status.
