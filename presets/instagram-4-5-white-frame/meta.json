@@ -19,6 +19,7 @@
     "to": []
   },
   "minVersion": "2.5.0",
+  "warnings": [],
   "discussion": null,
   "license": "CC0-1.0"
 }

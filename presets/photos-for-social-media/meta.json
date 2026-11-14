@@ -22,6 +22,12 @@
     ]
   },
   "minVersion": "2.5.0",
+  "warnings": [
+    {
+      "code": "strips_metadata",
+      "severity": "info"
+    }
+  ],
   "discussion": null,
   "license": "CC0-1.0"
 }
