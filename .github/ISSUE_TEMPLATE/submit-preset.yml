@@ -1,5 +1,5 @@
 # The field labels below are read by tools/submission.py. Change a label there too, and keep the Tags options in
-# sync with tags.json and the Languages options with LANGUAGES in tools/common.py (tools/tests checks both).
+# sync with tags.json and the Language options with LANGUAGES in tools/common.py (tools/tests checks both).
 name: Submit a preset
 description: Share a Filee preset or toolbar with everyone. A bot turns this into a pull request.
 title: "Preset: "
@@ -32,11 +32,10 @@ body:
       required: true
 
   - type: dropdown
-    id: languages
+    id: language
     attributes:
-      label: Languages
-      description: The language(s) you wrote the title and description in.
-      multiple: true
+      label: Language
+      description: The language you wrote the title and description in (the preset's main language). Other languages can be added later in a pull request.
       options:
         - English (en)
         - 한국어 (ko)

@@ -56,7 +56,7 @@ def body(**over) -> str:
     fields = {
         "Title": "Instagram-ready JPG",
         "Description": "Resizes photos to 1080 px and saves them as JPG for Instagram posts.",
-        "Languages": "English (en), 한국어 (ko)",
+        "Language": "한국어 (ko)",
         "Tags": "images, social",
         "Preset file": f"[filee-presets.json]({PRESET_URL})",
         "Images": f'<img width="1600" alt="Image" src="{ASSET1}" />\n\n![Image]({ASSET2})',
@@ -122,7 +122,8 @@ class SubmissionTests(Stubbed):
         folder = out / "presets" / "instagram-ready-jpg"
         meta = json.loads((folder / "meta.json").read_text(encoding="utf-8"))
         self.assertEqual(meta["author"], "someone")
-        self.assertEqual(meta["languages"], ["en", "ko"])
+        self.assertEqual(meta["language"], "ko")
+        self.assertEqual(meta["languages"], ["ko"])
         self.assertEqual(meta["tags"], ["images", "social"])
         self.assertEqual(meta["kinds"], ["convert"])
         self.assertIsNone(meta["discussion"])
@@ -311,6 +312,40 @@ class CheckAndPublishTests(Stubbed):
         self.assertIn("can't add new ones", messages)
         self.assertIn("images/ko/deep", messages)
 
+    def test_languages(self):
+        built = self.build()
+        tags = common.load_tags(self.repo)
+        meta = json.loads((built / "meta.json").read_text(encoding="utf-8"))
+        self.assertEqual((meta["language"], meta["languages"]), ("ko", ["ko"]))
+        # translations: checked like the main texts; codes must be app codes; descriptions need a title
+        meta["titleByLang"] = {"ja": "インスタ用JPG", "en": "Instagram JPG"}
+        meta["descriptionByLang"] = {"ja": "写真をインスタ用のJPGにします。1080 px。"}
+        common.write_json(built / "meta.json", meta)
+        self.assertEqual(rules.check_folder(built, tags, published=False)[0], [])
+        for bad, needle in (({"titleByLang": {"xx": "Some title"}}, "`xx`"),
+                            ({"titleByLang": {"ja": "see https://x.example"}}, "links"),
+                            ({"titleByLang": {"ko": "Same language"}}, "repeats the main language"),
+                            ({"descriptionByLang": {"de": "Ohne Titel geht das nicht."}}, "without a title"),
+                            ({"language": "klingon"}, "`language`")):
+            broken = dict(meta, **bad)
+            msgs = " ".join(e["message"] for e in rules.check_meta(broken, built.name, tags, published=False))
+            self.assertIn(needle, msgs, bad)
+        # publish derives languages; an old meta.json without `language` takes languages[0]
+        del meta["language"]
+        meta["languages"] = ["ko", "de"]
+        common.write_json(built / "meta.json", meta)
+        import shutil
+        shutil.copytree(built, self.repo / "presets" / built.name)
+        entry, errors = publish.publish_one(self.repo, self.repo / "presets" / built.name, tags,
+                                            fake_cli(self.tmp, GOOD_CLI), None)
+        self.assertEqual(errors, [])
+        self.assertEqual(entry["language"], "ko")
+        self.assertEqual(entry["languages"], ["ko", "en", "ja"])
+        self.assertEqual(entry["titleByLang"]["ja"], "インスタ用JPG")
+        published = json.loads((self.repo / "presets" / built.name / "meta.json").read_text(encoding="utf-8"))
+        self.assertEqual(rules.check_meta(published, built.name, tags, published=True), [])
+        self.assertTrue(rules.check_meta(dict(published, languages=["ko"]), built.name, tags, published=True))
+
     def test_folder_size_cap(self):
         built = self.build()
         original = common.MAX_FOLDER_BYTES
@@ -424,11 +459,11 @@ class SmallTests(unittest.TestCase):
     def test_form_matches_tags_and_languages(self):
         form = (ROOT / ".github" / "ISSUE_TEMPLATE" / "submit-preset.yml").read_text(encoding="utf-8")
         labels = re.findall(r"^\s+label: (.+)$", form, re.MULTILINE)
-        for field in submission.FIELDS:
+        for field in submission.FORM_FIELDS:
             self.assertIn(field, labels)
         tag_block = form.split("id: tags", 1)[1].split("validations", 1)[0]
         self.assertEqual(re.findall(r"^\s+- ([a-z0-9-]+)$", tag_block, re.MULTILINE), common.load_tags(ROOT))
-        lang_block = form.split("id: languages", 1)[1].split("validations", 1)[0]
+        lang_block = form.split("id: language", 1)[1].split("validations", 1)[0]
         codes = re.findall(r"\(([A-Za-z-]+)\)$", lang_block, re.MULTILINE)
         self.assertEqual(sorted(codes), sorted(common.LANGUAGES))
 

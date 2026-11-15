@@ -27,7 +27,9 @@ members may send several folders in one pull request; each is still checked on i
 | `description` | 10-600 characters, plain text, no links or HTML |
 | `author` | your GitHub login (CI checks it can't change later) |
 | `tags` | 0-6 ids from [tags.json](tags.json) |
-| `languages` | 1-6 of the codes Filee's UI uses (`en`, `ko`, `ja`, `zh-CN`, ...) |
+| `language` | the main language of `title`, `description` and the default images: one of the codes Filee's UI uses (`en`, `ko`, `ja`, `zh-CN`, ...) |
+| `titleByLang`, `descriptionByLang` | optional translations, `{"ja": "..."}`, same limits as `title` and `description`; a language needs a title to count, its description falls back to the main one |
+| `languages` | derived by CI: `language` plus every code in `titleByLang` (the supported languages) |
 | `kinds`, `formats`, `minVersion` | what `filee presets check` derives |
 | `warnings` | `[{"code", "severity"}]` from `filee presets check`: what the preset can do that people see before installing (left out with older validators) |
 | `created`, `updated`, `discussion` | set by CI on main (leave out / `null`) |

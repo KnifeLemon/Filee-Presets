@@ -81,7 +81,7 @@ publish. Copies people already installed stay on their computers (CC0 can't be w
 
 ```
 presets/<slug>/preset.json          the exported Filee preset bundle
-presets/<slug>/meta.json            title, description, author, tags, languages, ... (author and derived fields set by CI)
+presets/<slug>/meta.json            title, description, language, translations, author, tags, ... (author and derived fields set by CI)
 presets/<slug>/images/1.webp        1 to 4 images, 1 is the cover
 presets/<slug>/images/1-thumb.webp  thumbnails (480 px), made by CI
 presets/<slug>/images/ko/1.webp     optional images for one app language (same numbers, may have fewer)
@@ -91,6 +91,12 @@ tags.json                           the tags a preset can use
 
 The app and the site read `index.json` (mirrored on filee.sh). `stats` in this repository's copy are always zero;
 filee.sh fills them in.
+
+**Languages.** A preset is written in one main language (the form's Language field, `language` in meta.json).
+Translations of the title and description can be added later in a pull request (`titleByLang`,
+`descriptionByLang`); every language with a title counts as supported. Everyone sees every preset: in the
+viewer's language when it is supported, otherwise in the main language with a language badge, and presets in the
+viewer's language come first.
 
 **Images per language.** Screenshots of the app can come in the viewer's language: put them in
 `images/<language code>/` with the app's codes (`ko`, `ja`, `zh-CN`, `pt-BR`, `mn`, ...), numbered like the default

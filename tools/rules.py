@@ -13,7 +13,7 @@ import images
 from common import (
     DESC_MAX, DESC_MIN, FORMAT_ID_RE, HTML_RE, ISO_RE, KINDS, LANGUAGES, LICENSE, LINK_RE, LOGIN_RE,
     MAX_FOLDER_BYTES, MAX_LANGUAGES, MAX_META_BYTES, MAX_PRESET_BYTES, MAX_TAGS, META_KEYS, RESERVED_SLUGS, SLUG_RE,
-    MAX_WARNINGS, SEVERITIES, TITLE_MAX, TITLE_MIN, VERSION_RE, WARNING_CODE_RE, read_json,
+    MAX_WARNINGS, SEVERITIES, TITLE_MAX, TITLE_MIN, VERSION_RE, WARNING_CODE_RE, derive_languages, read_json,
 )
 
 IMAGE_NAME_RE = re.compile(r"^([1-4])(?:(-thumb)\.webp|\.(webp|png|jpg|jpeg))$")
@@ -122,6 +122,22 @@ def _str_list(value, max_len: int) -> bool:
         and len(set(value)) == len(value)
 
 
+def check_title(value, name: str) -> list[dict]:
+    if not isinstance(value, str) or not (TITLE_MIN <= len(value) <= TITLE_MAX) or "\n" in value or value != value.strip():
+        return [err("meta", f"{name} must be one line of {TITLE_MIN}-{TITLE_MAX} characters.")]
+    if LINK_RE.search(value) or HTML_RE.search(value):
+        return [err("meta", f"{name} must not contain links or HTML.")]
+    return []
+
+
+def check_description(value, name: str) -> list[dict]:
+    if not isinstance(value, str) or not (DESC_MIN <= len(value) <= DESC_MAX):
+        return [err("meta", f"{name} must be {DESC_MIN}-{DESC_MAX} characters.")]
+    if LINK_RE.search(value) or HTML_RE.search(value):
+        return [err("meta", f"{name} must be plain text without links or HTML.")]
+    return []
+
+
 def check_meta(meta, slug: str, tags: list[str], *, published: bool) -> list[dict]:
     """published=False: before the merge, `created` and `updated` are left out and `discussion` is null; CI sets
     them on main. (Filee's validator accepts a missing time but not a null one.)"""
@@ -130,7 +146,9 @@ def check_meta(meta, slug: str, tags: list[str], *, published: bool) -> list[dic
     errors = []
     keys = list(meta.keys())
     # `warnings` is left out when the validator that published the preset didn't report any field for it.
-    optional = {"warnings"} if published else {"created", "updated", "warnings"}
+    optional = {"warnings", "titleByLang", "descriptionByLang"}
+    if not published:  # set by CI on main; `language` is filled in from `languages` for older submissions
+        optional |= {"created", "updated", "language"}
     missing = [k for k in META_KEYS if k not in meta and k not in optional]
     extra = [k for k in keys if k not in META_KEYS]
     if missing:
@@ -139,16 +157,30 @@ def check_meta(meta, slug: str, tags: list[str], *, published: bool) -> list[dic
         errors.append(err("meta", "meta.json has unknown fields: " + ", ".join(e[:40] for e in extra[:10]) + "."))
     if meta.get("id") != slug:
         errors.append(err("meta", "meta.json `id` must equal the folder name."))
-    title = meta.get("title")
-    if not isinstance(title, str) or not (TITLE_MIN <= len(title) <= TITLE_MAX) or "\n" in title or title != title.strip():
-        errors.append(err("meta", f"`title` must be one line of {TITLE_MIN}-{TITLE_MAX} characters."))
-    elif LINK_RE.search(title) or HTML_RE.search(title):
-        errors.append(err("meta", "`title` must not contain links or HTML."))
-    desc = meta.get("description")
-    if not isinstance(desc, str) or not (DESC_MIN <= len(desc) <= DESC_MAX):
-        errors.append(err("meta", f"`description` must be {DESC_MIN}-{DESC_MAX} characters."))
-    elif LINK_RE.search(desc) or HTML_RE.search(desc):
-        errors.append(err("meta", "`description` must be plain text without links or HTML."))
+    errors += check_title(meta.get("title"), "`title`")
+    errors += check_description(meta.get("description"), "`description`")
+    if "language" in meta and meta["language"] not in LANGUAGES:
+        errors.append(err("meta", "`language` must be one of the app's language codes (en, ko, ja, zh-CN, ...)."))
+    main = (derive_languages(meta) or [None])[0]
+    for key, check in (("titleByLang", check_title), ("descriptionByLang", check_description)):
+        if key not in meta:
+            continue
+        texts = meta[key]
+        if not isinstance(texts, dict) or len(texts) > len(LANGUAGES):
+            errors.append(err("meta", f"`{key}` must be an object of language code: text."))
+            continue
+        for code, text in texts.items():
+            if code not in LANGUAGES:
+                errors.append(err("meta", f"`{key}` has `{str(code)[:16]}`, which is not one of the app's language codes."))
+            elif code == main:
+                errors.append(err("meta", f"`{key}.{code}` repeats the main language; that text goes in title/description."))
+            else:
+                errors += check(text, f"`{key}.{code}`")
+    if isinstance(meta.get("descriptionByLang"), dict):
+        orphans = sorted(set(meta["descriptionByLang"]) - set(meta.get("titleByLang") or {}))
+        if orphans:
+            errors.append(err("meta", "`descriptionByLang` has languages without a title in `titleByLang`: "
+                              + ", ".join(str(o)[:16] for o in orphans) + "."))
     author = meta.get("author")
     if not isinstance(author, str) or not LOGIN_RE.match(author):
         errors.append(err("meta", "`author` must be a GitHub login."))
@@ -161,7 +193,9 @@ def check_meta(meta, slug: str, tags: list[str], *, published: bool) -> list[dic
             errors.append(err("meta", "Unknown tags (add them to tags.json first): " + ", ".join(u[:30] for u in unknown) + "."))
     langs = meta.get("languages")
     if not _str_list(langs, MAX_LANGUAGES) or not langs or any(l not in LANGUAGES for l in langs):
-        errors.append(err("meta", "`languages` must list 1-6 of the supported language codes."))
+        errors.append(err("meta", "`languages` must list the supported language codes."))
+    elif published and langs != derive_languages(meta):
+        errors.append(err("meta", "`languages` must be `language` plus the codes in `titleByLang` (CI sets it)."))
     kinds = meta.get("kinds")
     if not _str_list(kinds, 3) or not kinds or any(k not in KINDS for k in kinds):
         errors.append(err("meta", "`kinds` must list convert, tool and/or toolbar."))

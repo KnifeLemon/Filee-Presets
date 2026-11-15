@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import json
 import shlex
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 from common import FORMAT_ID_RE, KINDS, SEVERITIES, VERSION_RE, WARNING_CODE_RE
@@ -93,11 +95,20 @@ def check(folder: Path, cli: str) -> dict:
     """Returns {ok, errors[], warnings[], derived{kinds, formats, minVersion} | None}."""
     if not cli:
         return _error("validator-missing", "The Filee validator is not configured (FILEE_CLI).")
-    cmd = shlex.split(cli) + ["presets", "check", str(folder), "--json"]
-    try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT, encoding="utf-8", errors="replace")
-    except (OSError, subprocess.TimeoutExpired) as e:
-        return _error("validator-failed", f"The Filee validator could not run ({type(e).__name__}).")
+    # The validator gets preset.json and the images, not meta.json: this repository owns the meta.json rules
+    # (tools/rules.py), so a new meta field doesn't need a new Filee release first.
+    with tempfile.TemporaryDirectory(prefix="filee-check-") as tmp:
+        copy = Path(tmp) / folder.name
+        copy.mkdir()
+        if (folder / "preset.json").is_file():
+            shutil.copyfile(folder / "preset.json", copy / "preset.json")
+        if (folder / "images").is_dir():
+            shutil.copytree(folder / "images", copy / "images", symlinks=True)
+        cmd = shlex.split(cli) + ["presets", "check", str(copy), "--json"]
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=TIMEOUT, encoding="utf-8", errors="replace")
+        except (OSError, subprocess.TimeoutExpired) as e:
+            return _error("validator-failed", f"The Filee validator could not run ({type(e).__name__}).")
     data = _parse(proc.stdout)
     if not isinstance(data, dict) or not isinstance(data.get("ok"), bool):
         return _error("validator-output", f"The Filee validator gave no readable result (exit code {proc.returncode}).")

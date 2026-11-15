@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import filee_cli  # noqa: E402
 import rules  # noqa: E402
-from common import MAX_META_BYTES, SLUG_RE, load_tags, read_json, write_json  # noqa: E402
+from common import MAX_META_BYTES, SLUG_RE, derive_languages, load_tags, read_json, write_json  # noqa: E402
 
 err = rules.err
 MULTI_PRESET_ASSOCIATIONS = {"OWNER", "MEMBER"}
@@ -119,6 +119,10 @@ def check_one(base: Path, pr: Path, slug: str, only_deletes: bool, others: set[s
         derived = cli_result["derived"]
         result["derived"] = derived
         if cli_result["ok"] and meta is not None and derived:
+            if "language" not in meta:
+                notes.append("meta.json has no `language`; publish takes the first of `languages`.")
+            elif meta.get("languages") != derive_languages(meta):
+                notes.append("`languages` is `language` plus the `titleByLang` codes; it is updated on publish.")
             for key in ("kinds", "formats", "minVersion"):
                 if meta.get(key) != derived.get(key):
                     notes.append(f"`{key}` in meta.json differs from what Filee derives; it is updated on publish.")

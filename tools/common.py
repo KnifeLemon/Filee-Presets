@@ -27,7 +27,6 @@ HTML_RE = re.compile(r"<\s*/?\s*[A-Za-z!]")
 TITLE_MIN, TITLE_MAX = 3, 60
 DESC_MIN, DESC_MAX = 10, 600
 MAX_TAGS = 6
-MAX_LANGUAGES = 6
 MIN_IMAGES, MAX_IMAGES = 1, 4
 MAX_IMAGE_BYTES = 2 * 1024 * 1024
 MAX_FOLDER_BYTES = 40 * 1024 * 1024  # everything in presets/<slug>/, language image sets included
@@ -49,9 +48,18 @@ LANGUAGES = [
 ]
 
 META_KEYS = [
-    "id", "title", "description", "author", "tags", "languages", "kinds", "formats", "minVersion", "warnings",
-    "created", "updated", "discussion", "license",
+    "id", "language", "title", "description", "titleByLang", "descriptionByLang", "author", "tags", "languages",
+    "kinds", "formats", "minVersion", "warnings", "created", "updated", "discussion", "license",
 ]
+MAX_LANGUAGES = len(LANGUAGES)
+
+
+def derive_languages(meta: dict) -> list[str]:
+    """The supported languages: the main `language`, then every code with a title in `titleByLang`. Old meta.json
+    files without `language` use the first of their `languages`."""
+    main = meta.get("language") or (meta.get("languages") or [None])[0]
+    extra = sorted(k for k in (meta.get("titleByLang") or {}) if k != main)
+    return [main] + extra if main else extra
 
 CHECK_MARKER = "<!-- filee-presets-check -->"
 SUBMISSION_MARKER = "<!-- filee-presets-submission -->"

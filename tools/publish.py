@@ -24,7 +24,7 @@ import filee_cli  # noqa: E402
 import images  # noqa: E402
 import rules  # noqa: E402
 from common import (  # noqa: E402
-    META_KEYS, PUBLISH_MARKER, clean_text, env, load_tags, write_json,
+    META_KEYS, PUBLISH_MARKER, clean_text, derive_languages, env, load_tags, write_json,
 )
 
 STATS = {"likes": 0, "comments": 0, "downloads": 0, "hot": 0.0,
@@ -147,6 +147,9 @@ def publish_one(root: Path, folder: Path, tags: list[str], cli: str, discussions
     derived = result["derived"]
     times = history(root, slug)
     updated = dict(meta)
+    # One main language; older meta.json files only had `languages`, whose first one becomes it.
+    updated["language"] = meta.get("language") or meta["languages"][0]
+    updated["languages"] = derive_languages(updated)
     updated["kinds"] = derived["kinds"]
     updated["formats"] = derived["formats"]
     updated["minVersion"] = derived["minVersion"]
@@ -191,6 +194,16 @@ def main() -> int:
                   f"'{env('DISCUSSION_CATEGORY') or 'Presets'}'. Create it (Settings > Discussions); "
                   "presets are published without a discussion until then.")
 
+    index_path = root / "index.json"
+    old = None
+    if index_path.is_file():
+        try:
+            old = json.loads(index_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            old = None
+    old_entries = {e.get("id"): e for e in (old or {}).get("presets", []) if isinstance(e, dict)} \
+        if isinstance(old, dict) else {}
+
     entries, failed = [], {}
     presets_dir = root / "presets"
     for folder in sorted(presets_dir.iterdir()) if presets_dir.is_dir() else []:
@@ -202,14 +215,11 @@ def main() -> int:
             entries.append(entry)
         else:
             failed[folder.name] = errors
-
-    index_path = root / "index.json"
-    old = None
-    if index_path.is_file():
-        try:
-            old = json.loads(index_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            old = None
+            # A preset that was published before stays listed as it was (the job still fails), so a broken
+            # validator or rule change can't empty the gallery.
+            previous = old_entries.get(folder.name)
+            if previous:
+                entries.append(previous)
     generated = old.get("generated") if isinstance(old, dict) and old.get("presets") == entries else now()
     write_json(index_path, {"version": 1, "generated": generated, "presets": entries})
     if args.failed:

@@ -24,13 +24,14 @@ import filee_cli  # noqa: E402
 import fetch  # noqa: E402
 import images  # noqa: E402
 from common import (  # noqa: E402
-    DESC_MAX, DESC_MIN, HTML_RE, LANGUAGES, LICENSE, LINK_RE, LOGIN_RE, MAX_IMAGES, MAX_LANGUAGES,
+    DESC_MAX, DESC_MIN, HTML_RE, LANGUAGES, LICENSE, LINK_RE, LOGIN_RE, MAX_IMAGES,
     MAX_PRESET_BYTES, MAX_TAGS, META_KEYS, MIN_IMAGES, RESERVED_SLUGS, SLUG_RE, TITLE_MAX, TITLE_MIN, clean_text,
     load_tags, slugify, write_json,
 )
 
 # The issue form's field labels (.github/ISSUE_TEMPLATE/submit-preset.yml). Keep both in sync.
-FIELDS = ["Title", "Description", "Languages", "Tags", "Preset file", "Images", "Agreement"]
+FIELDS = ["Title", "Description", "Language", "Languages", "Tags", "Preset file", "Images", "Agreement"]
+FORM_FIELDS = [f for f in FIELDS if f != "Languages"]  # "Languages" is only read from older issues
 NO_RESPONSE = "_No response_"
 FENCED_JSON_RE = re.compile(r"```(?:json|jsonc)?\s*\n(.*?)\n```", re.DOTALL)
 LANG_OPTION_RE = re.compile(r"\(([A-Za-z]{2,3}(?:-[A-Za-z]{2,4})?)\)\s*$")
@@ -84,16 +85,15 @@ def parse_form(body: str, tags: list[str], problems: Problems) -> dict:
     elif LINK_RE.search(desc) or HTML_RE.search(desc):
         problems.add("description", "The description must be plain text without links or HTML.")
 
+    # One main language (the "Language" field; older issues had a multiple-choice "Languages": its first counts).
     langs = []
-    for part in s.get("Languages", "").split(","):
+    for part in (s.get("Language") or s.get("Languages", "")).split(","):
         m = LANG_OPTION_RE.search(part.strip())
         if m and m.group(1) in LANGUAGES:
             langs.append(m.group(1))
-    langs = unique(langs)
+    langs = unique(langs)[:1]
     if not langs:
-        problems.add("languages", "Choose the language the title and description are written in.")
-    elif len(langs) > MAX_LANGUAGES:
-        problems.add("languages", f"Choose at most {MAX_LANGUAGES} languages.")
+        problems.add("language", "Choose the language the title and description are written in.")
 
     chosen_tags = unique(t.strip() for t in s.get("Tags", "").split(",") if t.strip() in tags)
     if len(chosen_tags) > MAX_TAGS:
@@ -208,11 +208,12 @@ def run(event_path: Path, repo: Path, out: Path, cli: str) -> dict:
 
     meta = {
         "id": slug,
+        "language": form["languages"][0],
         "title": form["title"],
         "description": form["description"],
         "author": author,
         "tags": form["tags"],
-        "languages": form["languages"],
+        "languages": form["languages"],  # derived: only the main language until titleByLang is added
         "kinds": derived["kinds"],
         "formats": derived["formats"],
         "minVersion": derived["minVersion"],
