@@ -255,6 +255,14 @@ jobs:
             case "$t" in sk-ant-oat*) prefix=yes ;; *) prefix=no ;; esac
             space=no; [ "$t" != "$(printf '%s' "$t" | tr -d '[:space:]')" ] && space=yes
             echo "::notice title=Claude token::length ${#t}, starts with sk-ant-oat: $prefix, contains spaces or line breaks: $space"
+            # A pasted secret often ends with a line break, and Claude Code then reports "Not logged in". The
+            # action reads the token from the environment, so hand it a cleaned copy (masked like the secret).
+            if [ "$space" = yes ]; then
+              echo "::warning title=Claude token::CLAUDE_CODE_OAUTH_TOKEN contains spaces or line breaks; they are removed for this run. Save the secret again without them."
+            fi
+            clean=$(printf '%s' "$t" | tr -d '[:space:]')
+            echo "::add-mask::$clean"
+            echo "CLAUDE_CODE_OAUTH_TOKEN=$clean" >> "$GITHUB_ENV"
           fi
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
             echo "auth=yes" >> "$GITHUB_OUTPUT"
@@ -270,8 +278,8 @@ jobs:
         timeout-minutes: 10
         uses: anthropics/claude-code-action@f3b070c88125d33dbae5653df5f143101d4ea9dc # v1.0.276
         with:
-          # The subscription token; the API key is only a fallback when the token isn't set.
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The subscription token comes from the environment (the cleaned copy above); the API key is only a
+          # fallback when the token isn't set.
           anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' && secrets.ANTHROPIC_API_KEY || '' }}
           github_token: ${{ github.token }}
           # Called from submission.yml, the run belongs to the submitter's `issues` event, and the action only
