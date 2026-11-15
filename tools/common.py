@@ -33,7 +33,7 @@ MAX_FOLDER_BYTES = 40 * 1024 * 1024  # everything in presets/<slug>/, language i
 MIN_LONG_EDGE, MAX_LONG_EDGE = 640, 2560
 THUMB_EDGE = 480
 MAX_PRESET_BYTES = 256 * 1024
-MAX_META_BYTES = 8 * 1024
+MAX_META_BYTES = 64 * 1024  # 23 languages of title + description stay far below it; the per-field limits still apply
 LICENSE = "CC0-1.0"
 KINDS = {"convert", "tool", "toolbar"}
 # derived.warnings from Filee's validator: what a preset can do that people should know before installing it.

@@ -346,6 +346,18 @@ class CheckAndPublishTests(Stubbed):
         self.assertEqual(rules.check_meta(published, built.name, tags, published=True), [])
         self.assertTrue(rules.check_meta(dict(published, languages=["ko"]), built.name, tags, published=True))
 
+    def test_meta_with_every_language_fits(self):
+        built = self.build()
+        meta = json.loads((built / "meta.json").read_text(encoding="utf-8"))
+        others = [code for code in common.LANGUAGES if code != meta["language"]]
+        meta["titleByLang"] = {code: "제" * common.TITLE_MAX for code in others}  # longest titles and descriptions,
+        meta["descriptionByLang"] = {code: "설" * common.DESC_MAX for code in others}  # 3 bytes per character
+        common.write_json(built / "meta.json", meta)
+        size = (built / "meta.json").stat().st_size
+        self.assertGreater(size, 8 * 1024)
+        self.assertLess(size, common.MAX_META_BYTES)
+        self.assertEqual(rules.check_folder(built, common.load_tags(self.repo), published=False)[0], [])
+
     def test_folder_size_cap(self):
         built = self.build()
         original = common.MAX_FOLDER_BYTES
