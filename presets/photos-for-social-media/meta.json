@@ -59,7 +59,29 @@
     "compress"
   ],
   "languages": [
-    "en"
+    "en",
+    "ar",
+    "bn-BD",
+    "de",
+    "es",
+    "fa",
+    "fr",
+    "hi",
+    "id",
+    "it",
+    "ja",
+    "ko",
+    "mn",
+    "ne",
+    "pl",
+    "pt-BR",
+    "pt-PT",
+    "ru",
+    "th",
+    "tr",
+    "vi",
+    "zh-CN",
+    "zh-TW"
   ],
   "kinds": [
     "convert"
@@ -78,7 +100,7 @@
     }
   ],
   "created": "2026-11-14T20:59:19Z",
-  "updated": "2026-11-14T21:11:27Z",
+  "updated": "2026-11-15T02:19:09Z",
   "discussion": 5,
   "license": "CC0-1.0"
 }
