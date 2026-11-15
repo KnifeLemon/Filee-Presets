@@ -442,6 +442,22 @@ class SmallTests(unittest.TestCase):
         leaky["notes"] = "token sk-ant-oat01-" + "x" * 50
         self.assertNotIn("sk-ant", review.parse_verdict(json.dumps(leaky), tags)["notes"])
 
+    def test_diagnose(self):
+        tmp = Path(tempfile.mkdtemp())
+        f = tmp / "exec.json"
+        f.write_text(json.dumps([
+            {"type": "system", "subtype": "init", "model": "haiku", "apiKeySource": "none"},
+            {"type": "assistant", "error": "authentication_failed",
+             "message": {"content": [{"type": "text", "text": "Invalid token sk-ant-oat01-" + "y" * 40 + " ::set-output"}]}},
+            {"type": "result", "subtype": "success", "is_error": True, "num_turns": 1, "result": "API Error: 401"},
+        ]), encoding="utf-8")
+        text = review.diagnose(f)
+        self.assertIn("authentication_failed", text)
+        self.assertIn("API Error: 401", text)
+        self.assertNotIn("sk-ant", text)
+        self.assertNotIn("::set-output", text)
+        self.assertIn("No execution file", review.diagnose(tmp / "missing.json"))
+
     def test_verdict_from_run(self):
         tags = ["images"]
         good = json.dumps({"spam": False, "offensive": False, "misleading": False, "personal_info_in_images": False,

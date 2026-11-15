@@ -120,7 +120,7 @@ can't create categories. Until it exists, presets are published without a discus
 | Variable | Default | Use |
 | --- | --- | --- |
 | `FILEE_REF` | `feat/preset-gallery` | branch or tag of KnifeLemon/Filee whose `filee presets check` the checks build. Set it to `main` once the validator is merged there. |
-| `REVIEW_MODEL` | `claude-haiku-5-5` | model of the AI review (Claude Code `--model`) |
+| `REVIEW_MODEL` | `haiku` | model of the AI review (Claude Code `--model`; an alias such as `haiku` or `sonnet` works with the subscription token) |
 | `DISCUSSION_CATEGORY` | `Presets` | Discussions category for the preset posts |
 
 **6. Protecting main** is optional while there is one maintainer. If you add a ruleset later, `publish.yml` pushes

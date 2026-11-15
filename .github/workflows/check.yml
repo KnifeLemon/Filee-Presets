@@ -3,7 +3,8 @@
 # Started three ways:
 # - submission.yml calls it (workflow_call) right after it opens or updates a submission pull request. That pull
 #   request comes from GITHUB_TOKEN, and GitHub doesn't start other workflows for those, so it is called directly.
-# - pull_request: pull requests by people (rules only; forks get the result in the job summary).
+# - pull_request: pull requests by people (rules only; forks get the result in the job summary). Submission pull
+#   requests opened by github-actions[bot] are skipped here; submission.yml already checks them.
 # - a `/review` comment by a maintainer (owner, member or collaborator) on any pull request: the full check.
 #
 # rules   Repository rules (tools/check.py) plus Filee's own validator (`filee presets check --json`, built from
@@ -41,7 +42,9 @@ jobs:
   context:
     if: >-
       inputs.pr ||
-      github.event_name == 'pull_request' ||
+      (github.event_name == 'pull_request' &&
+       !(github.event.pull_request.user.login == 'github-actions[bot]' &&
+         startsWith(github.event.pull_request.head.ref, 'submission/'))) ||
       (github.event_name == 'issue_comment' &&
        github.event.issue.pull_request &&
        startsWith(github.event.comment.body, '/review') &&
@@ -208,7 +211,9 @@ jobs:
             /tags.json
             /tools/
 
+      # claude-code-action puts /usr/bin first on PATH for later steps, so they call this Python by its path.
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        id: py
         with:
           python-version: "3.12"
 
@@ -226,15 +231,17 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           REVIEW_MODEL: ${{ vars.REVIEW_MODEL }}
+          PY: ${{ steps.py.outputs.python-path }}
         run: |
-          python tools/review.py prepare --folder "$RUNNER_TEMP/check/preset" --out submission
-          python tools/review.py prompt --folder submission --out "$RUNNER_TEMP/prompt.txt"
-          model="${REVIEW_MODEL:-claude-haiku-5-5}"
+          "$PY" tools/review.py prepare --folder "$RUNNER_TEMP/check/preset" --out submission
+          "$PY" tools/review.py prompt --folder submission --out "$RUNNER_TEMP/prompt.txt"
+          # A model alias, so it works with the subscription token (CLAUDE_CODE_OAUTH_TOKEN) as with an API key.
+          model="${REVIEW_MODEL:-haiku}"
           if ! printf '%s' "$model" | grep -Eq '^[a-z0-9][a-z0-9.-]{1,60}$'; then
-            echo "::error::REVIEW_MODEL must be a model id such as claude-haiku-5-5."
+            echo "::error::REVIEW_MODEL must be a model alias or id such as haiku or sonnet."
             exit 1
           fi
-          schema=$(python tools/review.py schema)
+          schema=$("$PY" tools/review.py schema)
           {
             echo "prompt<<EOF_PROMPT_7f3a"
             cat "$RUNNER_TEMP/prompt.txt"
@@ -270,15 +277,24 @@ jobs:
           display_report: "false"
           show_full_output: "false"
 
+      # The action hides Claude Code's output; when it fails, show the error it reported (no secrets are in it).
+      - name: Show why the AI review failed
+        if: steps.prep.outputs.auth == 'yes' && steps.claude.outcome != 'success'
+        env:
+          PY: ${{ steps.py.outputs.python-path }}
+          EXECUTION: ${{ steps.claude.outputs.execution_file || format('{0}/claude-execution-output.json', runner.temp) }}
+        run: '"$PY" tools/review.py diagnose --execution "$EXECUTION"'
+
       - name: Check the verdict
         env:
           RAW: ${{ steps.claude.outputs.structured_output }}
           CONCLUSION: ${{ steps.prep.outputs.auth == 'yes' && (steps.claude.outcome == 'success' && steps.claude.outputs.conclusion || 'failure') || 'skipped' }}
           REVIEW_MODEL: ${{ vars.REVIEW_MODEL }}
+          PY: ${{ steps.py.outputs.python-path }}
         run: |
           mkdir -p "$RUNNER_TEMP/verdict"
           printf '%s' "$RAW" > "$RUNNER_TEMP/verdict/raw.json"
-          python tools/review.py verdict --raw "$RUNNER_TEMP/verdict/raw.json" --conclusion "$CONCLUSION" \
+          "$PY" tools/review.py verdict --raw "$RUNNER_TEMP/verdict/raw.json" --conclusion "$CONCLUSION" \
             --out "$RUNNER_TEMP/verdict/verdict.json"
           rm "$RUNNER_TEMP/verdict/raw.json"
 

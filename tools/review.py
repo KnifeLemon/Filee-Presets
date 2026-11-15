@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import sys
@@ -28,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import images  # noqa: E402
 from common import MAX_META_BYTES, MAX_PRESET_BYTES, env, load_tags, read_json, write_json  # noqa: E402
 
-DEFAULT_MODEL = "claude-haiku-5-5"
+DEFAULT_MODEL = "haiku"  # Claude Code alias: works with the subscription token and with an API key
 TAG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,23}$")
 SECRET_RE = re.compile(r"(sk-ant-[A-Za-z0-9_-]+|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|[A-Za-z0-9+/_-]{40,})")
 
@@ -148,6 +149,50 @@ def parse_verdict(text: str, tags: list[str]) -> dict | None:
     return verdict
 
 
+def _clean_log(value, limit: int = 1500) -> str:
+    text = SECRET_RE.sub("[redacted]", str(value))[:limit]
+    return text.replace("::", ": :")  # no workflow commands from what the model or the CLI wrote
+
+
+def diagnose(execution: Path) -> str:
+    """The error Claude Code reported, from the action's execution file (its messages, as JSON or JSON lines)."""
+    if not execution.is_file():
+        return "No execution file: the action stopped before Claude Code ran (see the step's log above)."
+    raw = execution.read_text(encoding="utf-8", errors="replace")
+    try:
+        messages = json.loads(raw)
+    except json.JSONDecodeError:
+        messages = []
+        for line in raw.splitlines():
+            try:
+                messages.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    if isinstance(messages, dict):
+        messages = [messages]
+    lines = []
+    for m in messages if isinstance(messages, list) else []:
+        if not isinstance(m, dict):
+            continue
+        kind = m.get("type")
+        if kind == "system" and m.get("subtype") == "init":
+            lines.append(f"init: model={_clean_log(m.get('model'), 80)} apiKeySource={_clean_log(m.get('apiKeySource'), 40)}")
+        elif kind == "assistant":
+            if m.get("error"):
+                lines.append(f"assistant error: {_clean_log(m.get('error'))}")
+                content = (m.get("message") or {}).get("content") or []
+                for block in content if isinstance(content, list) else []:
+                    if isinstance(block, dict) and block.get("type") == "text":
+                        lines.append(f"assistant text: {_clean_log(block.get('text'))}")
+        elif kind == "result":
+            lines.append(f"result: subtype={_clean_log(m.get('subtype'), 40)} is_error={m.get('is_error')} "
+                         f"stop_reason={_clean_log(m.get('stop_reason'), 40)} turns={m.get('num_turns')}")
+            for key in ("result", "errors", "error"):
+                if m.get(key):
+                    lines.append(f"{key}: {_clean_log(m.get(key))}")
+    return "\n".join(lines) or "The execution file holds no result message."
+
+
 def verdict_from_run(raw: str, conclusion: str, tags: list[str], model: str) -> dict:
     if conclusion == "skipped":
         return {"status": "skipped", "model": model,
@@ -170,6 +215,8 @@ def main() -> int:
     p.add_argument("--folder", required=True, type=Path)
     p.add_argument("--out", required=True, type=Path)
     p = sub.add_parser("schema")
+    p = sub.add_parser("diagnose")
+    p.add_argument("--execution", required=True, type=Path)
     p = sub.add_parser("verdict")
     p.add_argument("--raw", required=True, type=Path)
     p.add_argument("--conclusion", required=True)
@@ -181,6 +228,13 @@ def main() -> int:
         print("\n".join(prepare(args.folder, args.out)))
     elif args.cmd == "prompt":
         args.out.write_text(build_prompt(args.folder, load_tags(args.tags_root)), encoding="utf-8")
+    elif args.cmd == "diagnose":
+        text = diagnose(args.execution)
+        print(text)
+        summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary:
+            with open(summary, "a", encoding="utf-8") as f:
+                f.write("### AI review failed\n\n```\n" + text.replace("```", "'" * 3) + "\n```\n")
     elif args.cmd == "schema":
         print(json.dumps(SCHEMA, separators=(",", ":")))
     else:
