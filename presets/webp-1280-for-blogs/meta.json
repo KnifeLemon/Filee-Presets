@@ -1,0 +1,29 @@
+{
+  "id": "webp-1280-for-blogs",
+  "language": "en",
+  "title": "WebP 1280 for blogs",
+  "description": "Turns photos into WebP pictures for blog posts: quality 72, the long edge at most 1280 px, and camera and location details removed. Test submission by the maintainer to check the gallery's form and review.",
+  "author": "KnifeLemon",
+  "tags": [],
+  "languages": [
+    "en"
+  ],
+  "kinds": [
+    "convert"
+  ],
+  "formats": {
+    "from": [],
+    "to": [
+      "webp"
+    ]
+  },
+  "minVersion": "2.5.0",
+  "warnings": [
+    {
+      "code": "strips_metadata",
+      "severity": "info"
+    }
+  ],
+  "discussion": null,
+  "license": "CC0-1.0"
+}
