@@ -1,5 +1,6 @@
 {
   "id": "vertical-video-for-reels-and-shorts",
+  "language": "en",
   "title": "Vertical 9:16 video for Reels and Shorts",
   "description": "Cuts a landscape video to a centred 9:16 portrait frame for Instagram Reels, YouTube Shorts and TikTok, and saves it as an MP4 (H.264 and AAC) that every app takes, at most 1920 px tall. Keep the subject in the middle of the picture. Saved as name_vertical.mp4. Needs FFmpeg.",
   "author": "KnifeLemon",

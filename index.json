@@ -1,9 +1,10 @@
 {
   "version": 1,
-  "generated": "2026-11-14T21:18:44Z",
+  "generated": "2026-11-15T02:12:42Z",
   "presets": [
     {
       "id": "draft-pdf-for-review",
+      "language": "en",
       "title": "Draft PDF for review",
       "description": "Turns documents (Word, HWP, ODT, PowerPoint and others) or existing PDFs into a PDF with a large, faint DRAFT across every page and page numbers (1 / 5) at the bottom, so nobody mistakes a review copy for the final one. Saved next to the original as name_draft.pdf. Office documents need LibreOffice (Engines page).",
       "author": "KnifeLemon",
@@ -173,6 +174,7 @@
     },
     {
       "id": "instagram-4-5-white-frame",
+      "language": "en",
       "title": "Instagram 4:5 white frame",
       "description": "Puts a photo on a white 4:5 portrait canvas, the tallest shape an Instagram feed post shows, so landscape and square photos fit without being cropped. Opens the Add background window with this look ready: check the preview, change the colour or the padding if you like, and save. Writes a PNG next to the original. After installing, add it to your images donut on the Donut toolbar page.",
       "author": "KnifeLemon",
@@ -339,6 +341,7 @@
     },
     {
       "id": "merge-into-a4-pdf-for-printing",
+      "language": "en",
       "title": "Merge into one A4 PDF for printing",
       "description": "Drop PDFs, pictures and documents together and get one PDF where every page is A4, in the order you dropped them, with a bookmark for each file and page numbers at the bottom. Pages of other sizes (Letter, A5, phone screenshots, receipts) are fitted onto A4, so the whole file prints in one go. Saved as name_print.pdf after the first file. Office documents need LibreOffice (Engines page).",
       "author": "KnifeLemon",
@@ -508,6 +511,7 @@
     },
     {
       "id": "photos-for-social-media",
+      "language": "en",
       "title": "Photos for social media",
       "description": "Turns photos (JPG, PNG, HEIC, WebP and more) into JPGs ready for Instagram, Facebook, X or Threads: the long edge becomes 2048 px, quality 85, and every file stays under 4 MB. Location, camera and other metadata are removed so you don't share where a photo was taken; the colour profile stays, so colours look right. Saved next to the original as name_social.jpg.",
       "author": "KnifeLemon",
@@ -682,6 +686,7 @@
     },
     {
       "id": "podcast-voice-mp3",
+      "language": "en",
       "title": "Podcast voice MP3 (mono)",
       "description": "Turns voice recordings (WAV, M4A, phone memos, the sound of a video) into a mono MP3 at 96 kbit/s, a common choice for spoken podcasts and voice notes: about 43 MB per hour, and it plays everywhere. Music sounds better in stereo, so use it for speech. Saved as name_podcast.mp3. Needs FFmpeg.",
       "author": "KnifeLemon",
@@ -849,6 +854,7 @@
     },
     {
       "id": "scans-to-one-searchable-pdf",
+      "language": "en",
       "title": "Scans to one searchable PDF",
       "description": "Drop the photos or scans of a paper document's pages, in order, and get one PDF with A4 pages whose text you can search, select and copy: Filee recognises the English text offline with Tesseract. Change the language in the preset (for example deu, fra or kor) for other documents. Saved as name_scan.pdf after the first page. Needs Tesseract (Engines page).",
       "author": "KnifeLemon",
@@ -1018,6 +1024,7 @@
     },
     {
       "id": "small-gif-for-chat",
+      "language": "en",
       "title": "Small GIF for chat",
       "description": "Turns a short video clip into a small looping GIF for chats and comments: at most 320 px wide (360 px tall), 10 frames a second and 128 colours, so a few seconds stay well under a few megabytes. Works best on clips of under ten seconds; cut longer videos first with Cut a clip. Saved as name_chat.gif. Needs FFmpeg.",
       "author": "KnifeLemon",
@@ -1186,6 +1193,7 @@
     },
     {
       "id": "smallest-pdf-for-email",
+      "language": "en",
       "title": "Smallest PDF for email",
       "description": "Shrinks PDFs as far as they go while text stays sharp: pictures inside are brought down to screen resolution (72 dpi), document information (author, title, dates) is removed, and Ghostscript also tries when it is installed, keeping whichever file is smaller. Good for attachments and upload limits, not for printing. If a PDF can't get smaller, the original is kept.",
       "author": "KnifeLemon",
@@ -1359,6 +1367,7 @@
     },
     {
       "id": "vertical-video-for-reels-and-shorts",
+      "language": "en",
       "title": "Vertical 9:16 video for Reels and Shorts",
       "description": "Cuts a landscape video to a centred 9:16 portrait frame for Instagram Reels, YouTube Shorts and TikTok, and saves it as an MP4 (H.264 and AAC) that every app takes, at most 1920 px tall. Keep the subject in the middle of the picture. Saved as name_vertical.mp4. Needs FFmpeg.",
       "author": "KnifeLemon",
@@ -1527,6 +1536,7 @@
     },
     {
       "id": "webp-for-websites",
+      "language": "en",
       "title": "WebP for websites",
       "description": "Makes pictures light enough for a website or a blog: WebP at quality 80, at most 1920 px on the long edge (smaller pictures keep their size), metadata removed, colour profile kept. A typical photo ends up a tenth of its size or less. Transparent PNGs stay transparent. Saved next to the original as name_web.webp.",
       "author": "KnifeLemon",

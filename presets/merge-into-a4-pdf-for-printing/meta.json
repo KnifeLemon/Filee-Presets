@@ -1,5 +1,6 @@
 {
   "id": "merge-into-a4-pdf-for-printing",
+  "language": "en",
   "title": "Merge into one A4 PDF for printing",
   "description": "Drop PDFs, pictures and documents together and get one PDF where every page is A4, in the order you dropped them, with a bookmark for each file and page numbers at the bottom. Pages of other sizes (Letter, A5, phone screenshots, receipts) are fitted onto A4, so the whole file prints in one go. Saved as name_print.pdf after the first file. Office documents need LibreOffice (Engines page).",
   "author": "KnifeLemon",

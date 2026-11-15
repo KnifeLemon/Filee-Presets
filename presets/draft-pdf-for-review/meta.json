@@ -1,5 +1,6 @@
 {
   "id": "draft-pdf-for-review",
+  "language": "en",
   "title": "Draft PDF for review",
   "description": "Turns documents (Word, HWP, ODT, PowerPoint and others) or existing PDFs into a PDF with a large, faint DRAFT across every page and page numbers (1 / 5) at the bottom, so nobody mistakes a review copy for the final one. Saved next to the original as name_draft.pdf. Office documents need LibreOffice (Engines page).",
   "author": "KnifeLemon",

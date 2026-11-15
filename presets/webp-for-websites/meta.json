@@ -1,5 +1,6 @@
 {
   "id": "webp-for-websites",
+  "language": "en",
   "title": "WebP for websites",
   "description": "Makes pictures light enough for a website or a blog: WebP at quality 80, at most 1920 px on the long edge (smaller pictures keep their size), metadata removed, colour profile kept. A typical photo ends up a tenth of its size or less. Transparent PNGs stay transparent. Saved next to the original as name_web.webp.",
   "author": "KnifeLemon",

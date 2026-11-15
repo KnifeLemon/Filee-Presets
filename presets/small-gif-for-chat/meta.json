@@ -1,5 +1,6 @@
 {
   "id": "small-gif-for-chat",
+  "language": "en",
   "title": "Small GIF for chat",
   "description": "Turns a short video clip into a small looping GIF for chats and comments: at most 320 px wide (360 px tall), 10 frames a second and 128 colours, so a few seconds stay well under a few megabytes. Works best on clips of under ten seconds; cut longer videos first with Cut a clip. Saved as name_chat.gif. Needs FFmpeg.",
   "author": "KnifeLemon",
