@@ -249,6 +249,13 @@ jobs:
             # Read is the only tool; the deny rules keep it inside ./submission (and tags.json).
             echo "args=--model $model --permission-mode default --tools Read --disallowedTools \"mcp__*,Read(./.git/**),Read(./tools/**),Read(//proc/**),Read(//etc/**)\" --max-turns 8 --json-schema '$schema'"
           } >> "$GITHUB_OUTPUT"
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            # The token's shape only (never its value), to tell a mis-pasted secret from other failures.
+            t="$CLAUDE_CODE_OAUTH_TOKEN"
+            case "$t" in sk-ant-oat*) prefix=yes ;; *) prefix=no ;; esac
+            space=no; [ "$t" != "$(printf '%s' "$t" | tr -d '[:space:]')" ] && space=yes
+            echo "::notice title=Claude token::length ${#t}, starts with sk-ant-oat: $prefix, contains spaces or line breaks: $space"
+          fi
           if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || [ -n "$ANTHROPIC_API_KEY" ]; then
             echo "auth=yes" >> "$GITHUB_OUTPUT"
           else
