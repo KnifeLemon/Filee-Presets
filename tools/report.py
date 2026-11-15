@@ -84,7 +84,7 @@ def render(report: dict, verdict: dict | None, label: str) -> str:
             name = f" (`{defang(p.get('slug', ''), 48)}`)" if len(presets) > 1 else ""
             lines += ["", f"**This preset can{name}:** (shown to people before they install it)"]
             lines += [f"- {SEVERITY_TEXT.get(w.get('severity'), 'Note')}: {defang(w.get('message', ''), 300)} "
-                      f"(`{defang(w.get('code', ''), 48)}`)" for w in can]
+                      f"(`{re.sub(r'[^a-z0-9_]', '', str(w.get('code', '')))[:48]}`)" for w in can]
     warnings = report.get("warnings") or []
     if warnings:
         lines += ["", "**Needs a maintainer:**"] + [f"- {defang(w.get('message', ''), 300)}" for w in warnings[:10]]
