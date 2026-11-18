@@ -1,7 +1,59 @@
 {
   "version": 1,
-  "generated": "2026-11-15T02:32:25Z",
+  "generated": "2026-11-18T20:13:01Z",
   "presets": [
+    {
+      "id": "convert-multi-format-files-to-a4-pdf-merge",
+      "language": "en",
+      "title": "Convert multi-format files to A4 PDF & merge",
+      "description": "Supports converting multi‑format files to PDF and merging them. Files are sorted by filename initially and can be reordered manually. Pages are numbered at the bottom, scaled to fit A4, with orientation auto‑adjusted from the first page. The merged PDF saves to the source folder as  {name}_merged_{date}  using the first file’s base name. No OCR for better conversion performance. Add manually via Settings → Donut toolbar; recommended for Mixed files, Images, PDF and Documents profiles.",
+      "author": "NotColeAnywhere",
+      "tags": [
+        "pdf",
+        "merge",
+        "images",
+        "documents"
+      ],
+      "languages": [
+        "en"
+      ],
+      "kinds": [
+        "convert"
+      ],
+      "formats": {
+        "from": [],
+        "to": [
+          "pdf"
+        ]
+      },
+      "minVersion": "2.5.0",
+      "warnings": [],
+      "created": "2026-11-18T02:51:04Z",
+      "updated": "2026-11-18T20:08:38Z",
+      "discussion": 19,
+      "license": "CC0-1.0",
+      "images": [
+        "presets/convert-multi-format-files-to-a4-pdf-merge/images/1.webp",
+        "presets/convert-multi-format-files-to-a4-pdf-merge/images/2.webp",
+        "presets/convert-multi-format-files-to-a4-pdf-merge/images/3.webp"
+      ],
+      "thumb": "presets/convert-multi-format-files-to-a4-pdf-merge/images/1-thumb.webp",
+      "preset": "presets/convert-multi-format-files-to-a4-pdf-merge/preset.json",
+      "sha256": "89a95657e3526f021a025ece081f240a7da3416799908bcd2e73bb4fc7b9728e",
+      "stats": {
+        "likes": 0,
+        "comments": 0,
+        "downloads": 0,
+        "hot": 0.0,
+        "best": {
+          "day": 0,
+          "week": 0,
+          "month": 0,
+          "year": 0,
+          "all": 0
+        }
+      }
+    },
     {
       "id": "draft-pdf-for-review",
       "language": "en",
