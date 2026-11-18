@@ -2,7 +2,7 @@
   "id": "convert-multi-format-files-to-a4-pdf-merge",
   "language": "en",
   "title": "Convert multi-format files to A4 PDF & merge",
-  "description": "Supports converting multi‑format files to PDF and merging them. Files are sorted by filename initially and can be reordered manually. Pages are numbered at the bottom, scaled to fit A4, with orientation auto‑adjusted from the first page. The merged PDF saves to the source folder as  {name}-merged-{date}  using the first file’s base name. No OCR for better conversion performance. Add manually via Settings → Donut toolbar; recommended for Mixed files, Images, PDF and Documents profiles.",
+  "description": "Supports converting multi‑format files to PDF and merging them. Files are sorted by filename initially and can be reordered manually. Pages are numbered at the bottom, scaled to fit A4, with orientation auto‑adjusted from the first page. The merged PDF saves to the source folder as  {name}_merged_{date}  using the first file’s base name. No OCR for better conversion performance. Add manually via Settings → Donut toolbar; recommended for Mixed files, Images, PDF and Documents profiles.",
   "author": "NotColeAnywhere",
   "tags": [
     "pdf",
