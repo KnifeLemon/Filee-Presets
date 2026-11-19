@@ -75,6 +75,10 @@ How untrusted content is handled:
   It never labels, comments or merges: the report job does that, and it can only choose `ready` (rules passed with
   no warnings and a clean verdict) or `needs-review` (anything else, including a missing token, a time-out, a rate
   limit or an unreadable answer). Nothing merges automatically.
+- The verdict may propose text fixes for meta.json's `title`, `description` or `tags`. They are kept only when they
+  pass the repository rules on a patched copy of the checked meta.json, and the report job posts them as one pull
+  request review of suggested changes on the head commit (once per commit). A maintainer applies them with
+  **Commit suggestion**; a fix whose line isn't in the diff is shown in the check comment instead.
 - Text quoted back into comments is stripped of mentions, links and markup.
 
 Run the tool tests locally with Python 3.12:
@@ -105,9 +109,10 @@ and after a maintainer's `/review`, so usage stays bounded. The token expires; r
 replace the secret when reviews start failing with an authentication error.
 
 What the review can do: read the submission's meta.json, preset.json and images, and return a verdict (spam,
-offensive, misleading, personal information in images, description matches, suggested tags, a short note). What it
-can't: run commands, edit or write files, use the web, see the pull request's other files, use a GitHub token
-that can write, or label, comment, approve or merge.
+offensive, misleading, personal information in images, description matches, suggested tags, a short note, and
+checked text fixes for meta.json that the report job posts as suggested changes). What it can't: run commands, edit
+or write files, use the web, see the pull request's other files, use a GitHub token that can write, or label,
+comment, approve or merge.
 
 **3. Discussions category.** Discussions are on. In the Discussions tab, edit the categories and add **Presets**
 (format: Announcement, so only maintainers and the workflows start posts; everyone can comment and react). The API

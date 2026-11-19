@@ -58,7 +58,10 @@ The checks work from an allow-list: a field Filee's validator doesn't know fails
 2. **AI review** (advisory): Claude Code, with read-only access to the submission's files and nothing else,
    answers a fixed set of questions: spam, offensive or misleading? Does the description match the preset? Do the
    images show personal information? It suggests tags. It can't run anything, write anything or label the pull
-   request; a separate step reads its answer and sorts the pull request into `ready` or `needs-review`.
+   request; a separate step reads its answer and sorts the pull request into `ready` or `needs-review`. When it
+   finds a clear mistake in the title, description or tags (say, a file name that doesn't match the preset), the
+   bot posts the fix as a suggested change on `meta.json` for the maintainer to apply. If you edit the issue after
+   that, make the same change there.
 3. **A maintainer merges.** Nothing is published before that.
 
 ## License: CC0

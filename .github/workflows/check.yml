@@ -12,7 +12,8 @@
 #         come from main.
 # review  AI review (Claude Code via anthropics/claude-code-action, read-only, advisory), for submission pull
 #         requests and after `/review`.
-# report  Comments the result, sets `ready` / `needs-review` / `needs-changes` and a `rules` commit status on the head.
+# report  Comments the result, sets `ready` / `needs-review` / `needs-changes` and a `rules` commit status on the head,
+#         and posts the AI review's checked meta.json fixes as suggested changes (one pull request review).
 name: Check preset
 
 on:
@@ -192,7 +193,8 @@ jobs:
   # - a read-only GITHUB_TOKEN (contents: read), the Read tool only, no MCP tools, no Bash/Write/Edit/network,
   #   --permission-mode default (anything not allowed is denied; there is nobody to approve), few turns,
   # - a fixed prompt from tools/review.py. Its answer comes back as --json-schema structured output, and
-  #   tools/review.py checks it field by field. Labels and comments are set later by the report job, never by Claude.
+  #   tools/review.py checks it field by field (proposed meta.json fixes must pass the rules on a patched copy).
+#   Labels, comments and suggested changes are posted later by the report job, never by Claude.
   review:
     needs: [context, rules]
     if: always() && needs.context.outputs.review == 'true' && needs.rules.outputs.ok == 'true'
@@ -310,7 +312,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/verdict"
           printf '%s' "$RAW" > "$RUNNER_TEMP/verdict/raw.json"
           "$PY" tools/review.py verdict --raw "$RUNNER_TEMP/verdict/raw.json" --conclusion "$CONCLUSION" \
-            --out "$RUNNER_TEMP/verdict/verdict.json"
+            --out "$RUNNER_TEMP/verdict/verdict.json" --meta "$RUNNER_TEMP/check/preset/meta.json"
           rm "$RUNNER_TEMP/verdict/raw.json"
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
