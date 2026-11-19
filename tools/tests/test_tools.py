@@ -502,6 +502,8 @@ class SmallTests(unittest.TestCase):
         self.assertEqual(item["properties"]["field"]["enum"], list(review.FIX_FIELDS))
         self.assertFalse(item["additionalProperties"])
         self.assertIn("fixes", review.build_prompt(Path(tempfile.mkdtemp()), ["images"]))
+        # One plain type for every field: Claude Code's --json-schema gets no anyOf.
+        self.assertEqual(item["properties"]["replacement"], {"type": "string"})
 
     def test_published_image_check(self):
         tmp = Path(tempfile.mkdtemp())
@@ -557,6 +559,8 @@ class FixTests(unittest.TestCase):
                           {"field": "tags", "replacement": ["pdf"], "reason": "Not a document converter."})
         self.assertEqual([f["field"] for f in kept], ["description", "title", "tags"])
         self.assertEqual(kept[0]["replacement"], FIXED_DESC)
+        self.assertEqual(self.fixes({"field": "tags", "replacement": " pdf , ", "reason": "Comma-separated."})[0]["replacement"],
+                         ["pdf"])
         self.assertEqual(self.fixes(), [])
         self.assertEqual(review.parse_verdict(json.dumps(VERDICT), self.tags, FIX_META)["fixes"], [])  # optional
         verdict = review.verdict_from_run(json.dumps(dict(VERDICT, fixes=[
@@ -568,7 +572,8 @@ class FixTests(unittest.TestCase):
         bad = [
             {"field": "author", "replacement": "someone-else", "reason": "x"},          # not a fixable field
             {"field": "title", "replacement": ["Merge"], "reason": "x"},                # wrong type
-            {"field": "tags", "replacement": "pdf", "reason": "x"},                     # wrong type
+            {"field": "tags", "replacement": 3, "reason": "x"},                         # wrong type
+            {"field": "tags", "replacement": "pdf, not-a-tag", "reason": "x"},          # comma list, unknown tag
             {"field": "title", "replacement": "M" * (common.TITLE_MAX + 1), "reason": "x"},
             {"field": "title", "replacement": "ab", "reason": "x"},
             {"field": "description", "replacement": "short", "reason": "x"},
