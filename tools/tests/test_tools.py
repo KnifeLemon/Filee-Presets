@@ -495,6 +495,14 @@ class SmallTests(unittest.TestCase):
         codes = re.findall(r"\(([A-Za-z-]+)\)$", lang_block, re.MULTILINE)
         self.assertEqual(sorted(codes), sorted(common.LANGUAGES))
 
+    def test_schema_has_optional_fixes(self):
+        schema = review.SCHEMA
+        self.assertNotIn("fixes", schema["required"])
+        item = schema["properties"]["fixes"]["items"]
+        self.assertEqual(item["properties"]["field"]["enum"], list(review.FIX_FIELDS))
+        self.assertFalse(item["additionalProperties"])
+        self.assertIn("fixes", review.build_prompt(Path(tempfile.mkdtemp()), ["images"]))
+
     def test_published_image_check(self):
         tmp = Path(tempfile.mkdtemp())
         full, thumb = images.reencode(jpeg_with_gps())
@@ -503,6 +511,209 @@ class SmallTests(unittest.TestCase):
         self.assertIsNone(images.check_published(tmp / "a.webp", thumb=False))
         self.assertIsNone(images.check_published(tmp / "t.webp", thumb=True))
         self.assertIsNotNone(images.check_published(tmp / "a.webp", thumb=True))
+
+
+FIX_META = {
+    "id": "merge-to-a4-pdf",
+    "language": "en",
+    "title": "Merge to A4 PDF",
+    "description": "Merges the files into one A4 PDF, saved as {name}-merged-{date}.pdf.",
+    "author": "someone",
+    "tags": ["pdf", "documents"],
+    "languages": ["en"],
+    "kinds": ["convert"],
+    "formats": {"from": [], "to": ["pdf"]},
+    "minVersion": "2.5.0",
+    "discussion": None,
+    "license": "CC0-1.0",
+}
+FIXED_DESC = "Merges the files into one A4 PDF, saved as {name}_merged_{date}.pdf."
+VERDICT = {"spam": False, "offensive": False, "misleading": False, "personal_info_in_images": False,
+           "matches_description": False, "suggested_tags": [], "notes": "File name differs."}
+
+
+def meta_text(meta=FIX_META) -> str:
+    return json.dumps(meta, indent=2, ensure_ascii=False) + "\n"
+
+
+def added_patch(text: str) -> str:
+    lines = text.split("\n")[:-1]
+    return f"@@ -0,0 +1,{len(lines)} @@\n" + "\n".join("+" + line for line in lines)
+
+
+class FixTests(unittest.TestCase):
+    tags = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tags = common.load_tags(ROOT)
+
+    def fixes(self, *items, meta=FIX_META):
+        return review.parse_verdict(json.dumps(dict(VERDICT, fixes=list(items))), self.tags, meta)["fixes"]
+
+    def test_valid_fixes_are_kept(self):
+        kept = self.fixes({"field": "description", "replacement": FIXED_DESC, "reason": "preset.json saves {name}_merged_{date}."},
+                          {"field": "title", "replacement": "Merge into A4 PDF", "reason": "Typo."},
+                          {"field": "tags", "replacement": ["pdf"], "reason": "Not a document converter."})
+        self.assertEqual([f["field"] for f in kept], ["description", "title", "tags"])
+        self.assertEqual(kept[0]["replacement"], FIXED_DESC)
+        self.assertEqual(self.fixes(), [])
+        self.assertEqual(review.parse_verdict(json.dumps(VERDICT), self.tags, FIX_META)["fixes"], [])  # optional
+        verdict = review.verdict_from_run(json.dumps(dict(VERDICT, fixes=[
+            {"field": "description", "replacement": FIXED_DESC, "reason": "r"}])), "success", self.tags, "m", FIX_META)
+        self.assertEqual(len(verdict["verdict"]["fixes"]), 1)
+
+    def test_invalid_fixes_are_dropped(self):
+        good = {"field": "description", "replacement": FIXED_DESC, "reason": "File name."}
+        bad = [
+            {"field": "author", "replacement": "someone-else", "reason": "x"},          # not a fixable field
+            {"field": "title", "replacement": ["Merge"], "reason": "x"},                # wrong type
+            {"field": "tags", "replacement": "pdf", "reason": "x"},                     # wrong type
+            {"field": "title", "replacement": "M" * (common.TITLE_MAX + 1), "reason": "x"},
+            {"field": "title", "replacement": "ab", "reason": "x"},
+            {"field": "description", "replacement": "short", "reason": "x"},
+            {"field": "description", "replacement": "D" * (common.DESC_MAX + 1), "reason": "x"},
+            {"field": "tags", "replacement": ["pdf", "not-a-tag"], "reason": "x"},
+            {"field": "tags", "replacement": self.tags[:common.MAX_TAGS + 1], "reason": "x"},
+            {"field": "tags", "replacement": ["pdf", "pdf"], "reason": "x"},
+            {"field": "title", "replacement": "Merge‮ to A4 PDF", "reason": "x"},  # bidi override
+            {"field": "title", "replacement": "Merge\x07 to A4 PDF", "reason": "x"},
+            {"field": "title", "replacement": "Merge to\nA4 PDF", "reason": "x"},      # titles are one line
+            {"field": "description", "replacement": FIXED_DESC + " See https://x.example", "reason": "x"},
+            {"field": "description", "replacement": FIXED_DESC + " <b>bold</b>", "reason": "x"},
+            {"field": "title", "replacement": " Merge to A4 PDF", "reason": "x"},       # fails the rules
+            {"field": "title", "replacement": FIX_META["title"], "reason": "x"},        # no change
+            {"field": "description", "replacement": FIXED_DESC + " " + "k" * 45, "reason": "x"},  # token-like
+            {"field": "title", "replacement": "Merge into A4 PDF", "reason": ""},
+            {"field": "title", "replacement": "Merge into A4 PDF", "reason": "x", "extra": 1},
+            {"field": "title", "replacement": "Merge into A4 PDF"},
+            "not an object",
+        ]
+        for item in bad:
+            self.assertEqual(self.fixes(item), [], item)
+        # one per field, at most three, nothing without the checked meta.json
+        self.assertEqual(len(self.fixes(good, dict(good, replacement=FIXED_DESC + " Needs nothing else."))), 1)
+        many = [good, {"field": "title", "replacement": "Merge into A4 PDF", "reason": "x"},
+                {"field": "tags", "replacement": ["pdf"], "reason": "x"},
+                {"field": "tags", "replacement": ["pdf", "images"], "reason": "x"}]
+        self.assertEqual(len(self.fixes(*many)), 3)
+        self.assertEqual(self.fixes(good, meta=None), [])
+        self.assertTrue(review.parse_verdict(json.dumps(dict(VERDICT, fixes="nonsense")), self.tags, FIX_META) is not None)
+
+    def test_find_field_and_build_lines(self):
+        text = meta_text()
+        lines = text.split("\n")
+        self.assertEqual(report.find_field(text, "description", FIXED_DESC), (4, 4))
+        self.assertEqual(report.find_field(text, "tags", ["pdf"]), (6, 9))
+        self.assertEqual(report.build_lines([lines[4]], "description", FIXED_DESC),
+                         ['  "description": "Merges the files into one A4 PDF, saved as {name}_merged_{date}.pdf.",'])
+        self.assertEqual(report.build_lines(lines[6:10], "tags", ["pdf", "images"]),
+                         ['  "tags": [', '    "pdf",', '    "images"', "  ],"])
+        self.assertEqual(report.build_lines(lines[6:10], "tags", []), ['  "tags": [],'])
+        # no trailing comma on the last key, non-ASCII text kept as it is, single-line lists
+        last = '{\n  "id": "x",\n  "title": "Ünïcode tïtle"\n}\n'
+        self.assertEqual(report.find_field(last, "title", "Unicode title"), (2, 2))
+        self.assertEqual(report.build_lines(['  "title": "x"'], "title", "제목 ü"), ['  "title": "제목 ü"'])
+        compact = '{\n  "tags": ["pdf", "documents"],\n  "title": "T"\n}\n'
+        self.assertEqual(report.find_field(compact, "tags", ["pdf"]), (1, 1))
+        self.assertEqual(report.build_lines(['  "tags": ["pdf", "documents"],'], "tags", ["pdf"]),
+                         ['  "tags": [', '    "pdf"', "  ],"])
+        # a nested key or two keys on one line never match
+        nested = '{\n  "titleByLang": {\n    "title": "nested"\n  },\n  "title": "Main"\n}\n'
+        self.assertEqual(report.find_field(nested, "title", "Main title"), (4, 4))
+        self.assertIsNone(report.find_field('{"id": "x", "title": "T"}', "title", "New"))
+        self.assertIsNone(report.find_field("not json", "title", "New"))
+
+    def test_suggestion_body_and_fences(self):
+        body = report.suggestion_body("preset.json saves {name}_merged_{date} @someone", ['  "title": "New",'])
+        self.assertTrue(body.split("\n")[0].startswith("preset.json saves"))
+        self.assertNotIn("@someone", body)
+        self.assertIn('```suggestion\n  "title": "New",\n```', body)
+        self.assertIn("issue is edited later", body)
+        body = report.suggestion_body("r", ['  "description": "Use ```code``` or ````x````",'])
+        self.assertIn("`````suggestion\n", body)
+        self.assertTrue(body.split("\n\n")[1].endswith("\n`````"))
+
+    def test_diff_hunks(self):
+        patch = "@@ -1,4 +1,5 @@\n {\n-  \"title\": \"Old\",\n+  \"title\": \"New\",\n+  \"x\": 1,\n   \"id\": \"y\"\n\\ No newline at end of file\n@@ -20,2 +21,2 @@\n a\n+b"
+        self.assertEqual(report.diff_hunks(patch), [{1, 2, 3, 4}, {21, 22}])
+        self.assertEqual(report.diff_hunks(None), [])
+
+    def stub_gh(self, files_patch, reviews=()):
+        calls = []
+        text = meta_text()
+
+        def request(method, path, body=None, **kw):
+            calls.append((method, path, body))
+            if "/contents/" in path:
+                return {"content": __import__("base64").b64encode(text.encode()).decode()}
+            return {}
+
+        def paginate(path):
+            calls.append(("GET", path, None))
+            if path.endswith("/reviews"):
+                return iter(reviews)
+            return iter([{"filename": "presets/merge-to-a4-pdf/meta.json", "status": "added", "patch": files_patch}])
+
+        orig = report.gh.request, report.gh.paginate
+        report.gh.request, report.gh.paginate = request, paginate
+        self.addCleanup(lambda: (setattr(report.gh, "request", orig[0]), setattr(report.gh, "paginate", orig[1])))
+        return calls, text
+
+    def test_review_payload(self):
+        sha = "a" * 40
+        calls, text = self.stub_gh(added_patch(meta_text()))
+        fixes = [{"field": "description", "replacement": FIXED_DESC, "reason": "preset.json saves {name}_merged_{date}."},
+                 {"field": "tags", "replacement": ["pdf"], "reason": "Only PDFs come out."}]
+        posted, fallback = report.post_suggestions("o/r", 18, sha, "merge-to-a4-pdf", fixes)
+        self.assertEqual((posted, fallback), (2, []))
+        method, path, payload = calls[-1]
+        self.assertEqual((method, path), ("POST", "repos/o/r/pulls/18/reviews"))
+        self.assertEqual(payload["event"], "COMMENT")
+        self.assertEqual(payload["commit_id"], sha)
+        self.assertTrue(payload["body"].startswith(f"{report.SUGGEST_MARKER} {sha} -->"))
+        desc, tags = payload["comments"]
+        self.assertEqual({k: desc[k] for k in ("path", "line", "side")},
+                         {"path": "presets/merge-to-a4-pdf/meta.json", "line": 5, "side": "RIGHT"})
+        self.assertNotIn("start_line", desc)
+        self.assertIn('```suggestion\n  "description": "' + FIXED_DESC + '",\n```', desc["body"])
+        self.assertEqual((tags["start_line"], tags["line"], tags["start_side"]), (7, 10, "RIGHT"))
+        self.assertIn('```suggestion\n  "tags": [\n    "pdf"\n  ],\n```', tags["body"])
+        # applying the suggestions gives the fixed meta.json
+        lines = text.split("\n")
+        lines[6:10] = ['  "tags": [', '    "pdf"', "  ],"]
+        lines[4] = f'  "description": "{FIXED_DESC}",'
+        self.assertEqual(json.loads("\n".join(lines)), dict(FIX_META, description=FIXED_DESC, tags=["pdf"]))
+        rendered = report.render({"ok": True, "slug": "merge-to-a4-pdf", "mode": "new", "errors": []},
+                                 {"status": "done", "model": "m", "verdict": dict(VERDICT, fixes=fixes)}, "needs-review",
+                                 (posted, fallback))
+        self.assertIn("2 posted as suggested changes", rendered)
+
+    def test_fallback_when_not_in_diff(self):
+        # an update that only touched the title: the description line isn't in the diff
+        patch = "@@ -1,4 +1,4 @@\n {\n   \"id\": \"merge-to-a4-pdf\",\n   \"language\": \"en\",\n-  \"title\": \"Old\",\n+  \"title\": \"Merge to A4 PDF\","
+        calls, _ = self.stub_gh(patch)
+        fix = {"field": "description", "replacement": FIXED_DESC, "reason": "File name."}
+        posted, fallback = report.post_suggestions("o/r", 18, "b" * 40, "merge-to-a4-pdf", [fix])
+        self.assertEqual((posted, fallback), (0, [fix]))
+        self.assertFalse(any(m == "POST" for m, _, _ in calls))
+        text = report.render({"ok": True, "slug": "merge-to-a4-pdf", "mode": "update", "errors": []},
+                             {"status": "done", "model": "m", "verdict": dict(VERDICT, fixes=[fix])}, "needs-review",
+                             (posted, fallback))
+        self.assertIn("not placed on the diff", text)
+        self.assertIn("\\_merged\\_", text)
+
+    def test_no_second_review_for_the_same_commit(self):
+        sha = "c" * 40
+        calls, _ = self.stub_gh(added_patch(meta_text()), reviews=[
+            {"body": f"{report.SUGGEST_MARKER} {sha} -->\nold", "user": {"type": "Bot"}}])
+        fix = {"field": "description", "replacement": FIXED_DESC, "reason": "File name."}
+        self.assertEqual(report.post_suggestions("o/r", 18, sha, "merge-to-a4-pdf", [fix]), (1, []))
+        self.assertFalse(any(m == "POST" for m, _, _ in calls))
+        self.assertEqual(report.post_suggestions("o/r", 18, "not-a-sha", "merge-to-a4-pdf", [fix]), (0, [fix]))
+        self.assertEqual(report.verdict_fixes({"status": "error"}), [])
+        self.assertEqual(report.verdict_fixes({"status": "done", "verdict": {"fixes": [
+            fix, {"field": "author", "replacement": "x", "reason": "x"}]}}), [fix])
 
 
 if __name__ == "__main__":
